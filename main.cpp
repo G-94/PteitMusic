@@ -1,0 +1,18 @@
+#include <QApplication>
+#include <QDir>
+#include "homepage.h"
+#include "musicapi.h"
+#include "playerwidget.h"
+
+int main(int argc, char* argv[]) {
+    QApplication app(argc, argv);
+
+    homepage pl;
+    pl.setFixedSize(1280, 720);
+
+    pl.show();
+
+
+
+    return app.exec();
+}
