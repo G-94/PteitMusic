@@ -11,7 +11,7 @@ PlayerWidget::PlayerWidget(QWidget *parent)
 
     main_layout = new QVBoxLayout();
 
-    track_title = new QLabel("Сейчас ничего не играет");
+    track_title = new QLabel("Г‘ГҐГ©Г·Г Г± Г­ГЁГ·ГҐГЈГ® Г­ГҐ ГЁГЈГ°Г ГҐГІ");
     main_layout->addWidget(track_title);
 
     QHBoxLayout* slider = new QHBoxLayout();
@@ -260,8 +260,7 @@ void PlayerWidget::onClikcedbtnUnlike()
 void PlayerWidget::onClickedbtnDownload()
 {
     qDebug() << "Download button clicked";
-    // Здесь должна быть логика скачивания трека в постоянное хранилище
-    // Например, копирование из temp файла в папку с музыкой пользователя
+
 }
 
 void PlayerWidget::onClickedbtnVolume(bool Muted)
@@ -293,3 +292,4 @@ void PlayerWidget::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
         }
     }
 }
+
