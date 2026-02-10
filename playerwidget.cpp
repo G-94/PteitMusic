@@ -4,14 +4,15 @@ PlayerWidget::PlayerWidget(QWidget *parent)
     : QWidget{parent}
 {
 
-    QDir dir("current_songs");
+    QDir dir("Data/current_songs");
     if (!dir.exists()) {
+        QDir().mkpath("Data/current_songs");
         dir.mkdir(".");
     }
 
     main_layout = new QVBoxLayout();
 
-    track_title = new QLabel("Г‘ГҐГ©Г·Г Г± Г­ГЁГ·ГҐГЈГ® Г­ГҐ ГЁГЈГ°Г ГҐГІ");
+    track_title = new QLabel("Playlist is empty");
     main_layout->addWidget(track_title);
 
     QHBoxLayout* slider = new QHBoxLayout();
@@ -26,16 +27,12 @@ PlayerWidget::PlayerWidget(QWidget *parent)
 
     btnPlay = new QPushButton("Play");
     btnPlay->setEnabled(false);
-    btnPause = new QPushButton("Pause");
-    btnPause->setEnabled(false);
     btnPlayNext = new QPushButton("Next");
     btnPlayNext->setEnabled(false);
     btnPlayPrev = new QPushButton("Previous");
     btnPlayPrev->setEnabled(false);
     btnLike = new QPushButton("Like");
     btnLike->setEnabled(false);
-    btnUnlike = new QPushButton("Unlike");
-    btnUnlike->setEnabled(false);
     btnDownload = new QPushButton("Download");
     btnDownload->setEnabled(false);
     btnVolume = new QRadioButton("Volume off");
@@ -43,9 +40,7 @@ PlayerWidget::PlayerWidget(QWidget *parent)
     buttons_layout->addWidget(btnLike);
     buttons_layout->addWidget(btnPlayPrev);
     buttons_layout->addWidget(btnPlay);
-    buttons_layout->addWidget(btnPause);
     buttons_layout->addWidget(btnPlayNext);
-    buttons_layout->addWidget(btnUnlike);
     buttons_layout->addWidget(btnDownload);
     buttons_layout->addWidget(btnVolume);
 
@@ -59,11 +54,9 @@ PlayerWidget::PlayerWidget(QWidget *parent)
     player->setAudioOutput(aOutput);
 
     connect(btnPlay, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnPlay);
-    connect(btnPause, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnPause);
     connect(btnPlayNext, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnPlayNext);
     connect(btnPlayPrev, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnPlayPrev);
     connect(btnLike, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnLike);
-    connect(btnUnlike, &QPushButton::clicked, this, &PlayerWidget::onClikcedbtnUnlike);
     connect(btnDownload, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnDownload);
     connect(btnVolume, &QRadioButton::toggled, this, &PlayerWidget::onClickedbtnVolume);
 
@@ -101,16 +94,14 @@ PlayerWidget::PlayerWidget(QWidget *parent)
 void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_song_index, std::vector<Song> &likedSongs)
 {
     currentPlaylist = playlist;
-    currentLikedPlaylist = likedSongs;
+    MusicGlobal::current_liked_tracklist = likedSongs;
     current_song_index = temp_current_song_index;
 
     if(currentPlaylist.empty()) {
         btnPlay->setEnabled(false);
-        btnPause->setEnabled(false);
         btnPlayNext->setEnabled(false);
         btnPlayPrev->setEnabled(false);
         btnLike->setEnabled(false);
-        btnUnlike->setEnabled(false);
         btnDownload->setEnabled(false);
         trackTimePos->setValue(0);
         track_dur->setText("00:00");
@@ -126,7 +117,7 @@ void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_s
 
     Song song = currentPlaylist[current_song_index];
 
-    checkLikes(currentLikedPlaylist);
+    checkLikes(MusicGlobal::current_liked_tracklist);
 
     player->setSource(QUrl());
 
@@ -135,7 +126,7 @@ void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_s
         QByteArray songData = api.downloadSong(QString::fromStdString(songString_url));
 
         if(!songData.isEmpty()) {
-            QString temp_file_location = "current_songs/temp_" + QString::number(1) + ".mp3";
+            QString temp_file_location = "Data/current_songs/temp_" + QString::number(1) + ".mp3";
 
             std::ofstream song_file(temp_file_location.toStdString(), std::ios::binary);
             if(song_file.is_open()) {
@@ -147,8 +138,10 @@ void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_s
 
                 player->setSource(QUrl::fromLocalFile(temp_file_location));
                 player->setPosition(0);
+                btnLike->setEnabled(true);
+                btnPlay->setEnabled(true);
                 track_dur->setText("00:00");
-                player->play();
+                onClickedbtnPlay();
             }
             else {
                 qDebug() << "Song file wasnt open";
@@ -184,16 +177,23 @@ void PlayerWidget::checkLikes(const std::vector<Song>& likedTracklist)
     if(currentPlaylist.empty() || current_song_index < 0) return;
     Song song = currentPlaylist[current_song_index];
 
+    disconnect(btnLike, nullptr, nullptr, nullptr);
+
+    bool isLiked = false;
     for(const auto& liked_song : likedTracklist) {
         if(song.at("id") == liked_song.at("id")) {
-            btnLike->setEnabled(false);
-            btnUnlike->setEnabled(true);
-            return;
+            isLiked = true;
         }
     }
 
-    btnLike->setEnabled(true);
-    btnUnlike->setEnabled(false);
+    if(isLiked) {
+        btnLike->setText("Unlike");
+        connect(btnLike, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnUnlike);
+    } else {
+        btnLike->setText("Like");
+        connect(btnLike, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnLike);
+    }
+
 }
 
 void PlayerWidget::onClickedbtnPlay()
@@ -203,8 +203,9 @@ void PlayerWidget::onClickedbtnPlay()
         return;
     }
     player->play();
-    btnPlay->setEnabled(false);
-    btnPause->setEnabled(true);
+    btnPlay->setText("Pause");
+    disconnect(btnPlay, nullptr, nullptr, nullptr);
+    connect(btnPlay, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnPause);
     qDebug() << "Playing";
 
 }
@@ -212,8 +213,9 @@ void PlayerWidget::onClickedbtnPlay()
 void PlayerWidget::onClickedbtnPause()
 {
     player->pause();
-    btnPlay->setEnabled(true);
-    btnPause->setEnabled(false);
+    btnPlay->setText("Play");
+    disconnect(btnPlay, nullptr, nullptr, nullptr);
+    connect(btnPlay, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnPlay);
     qDebug() << "Paused";
 }
 
@@ -223,7 +225,7 @@ void PlayerWidget::onClickedbtnPlayNext()
 
     int nextSongIndex = current_song_index + 1;
     if (nextSongIndex < currentPlaylist.size()) {
-        SetSong(currentPlaylist, nextSongIndex, currentLikedPlaylist);
+        SetSong(currentPlaylist, nextSongIndex, MusicGlobal::current_liked_tracklist);
         onClickedbtnPlay();
     }
     else qDebug() << "No next track in playlist";
@@ -235,7 +237,7 @@ void PlayerWidget::onClickedbtnPlayPrev()
 
     int nextSongIndex = current_song_index - 1;
     if (nextSongIndex >= 0) {
-        SetSong(currentPlaylist, nextSongIndex, currentLikedPlaylist);
+        SetSong(currentPlaylist, nextSongIndex, MusicGlobal::current_liked_tracklist);
         onClickedbtnPlay();
     }
     else qDebug() << "No next track in playlist";
@@ -244,23 +246,26 @@ void PlayerWidget::onClickedbtnPlayPrev()
 void PlayerWidget::onClickedbtnLike()
 {
     qDebug() << "Like button clicked";
-    btnLike->setEnabled(false);
-    btnUnlike->setEnabled(true);
+    btnLike->setText("Unlike");
+    disconnect(btnLike, nullptr, nullptr, nullptr);
+    connect(btnLike, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnUnlike);
     emit likeSongRequest(currentPlaylist, current_song_index);
 }
 
-void PlayerWidget::onClikcedbtnUnlike()
+void PlayerWidget::onClickedbtnUnlike()
 {
     qDebug() << "Unlike button clicked";
-    btnUnlike->setEnabled(false);
-    btnLike->setEnabled(true);
+    btnLike->setText("Like");
+    disconnect(btnLike, nullptr, nullptr, nullptr);
+    connect(btnLike, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnLike);
     emit unlikeSongRequest(currentPlaylist, current_song_index);
 }
 
 void PlayerWidget::onClickedbtnDownload()
 {
     qDebug() << "Download button clicked";
-
+    // Здесь должна быть логика скачивания трека в постоянное хранилище
+    // Например, копирование из temp файла в папку с музыкой пользователя
 }
 
 void PlayerWidget::onClickedbtnVolume(bool Muted)
@@ -272,13 +277,9 @@ void PlayerWidget::onPlaybackStateChanged(QMediaPlayer::PlaybackState state)
 {
     switch(state) {
     case QMediaPlayer::PlaybackState::PlayingState:
-        btnPlay->setEnabled(false);
-        btnPause->setEnabled(true);
         checkNextAndPrev();
         break;
     case QMediaPlayer::PlaybackState::PausedState:
-        btnPlay->setEnabled(true);
-        btnPause->setEnabled(false);
         checkNextAndPrev();
         break;
     }
@@ -288,8 +289,7 @@ void PlayerWidget::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
     switch(status) {
     case QMediaPlayer::EndOfMedia:
         if(current_song_index + 1 < currentPlaylist.size()) {
-            this->SetSong(currentPlaylist, current_song_index + 1, currentLikedPlaylist);
+            this->SetSong(currentPlaylist, current_song_index + 1, MusicGlobal::current_liked_tracklist);
         }
     }
 }
-

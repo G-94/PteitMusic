@@ -6,7 +6,9 @@
 #include <QScrollBar>
 #include <QVBoxLayout>
 #include <QList>
+
 #include "songtracklistitem.h"
+#include "MusicGlobals.h"
 
 using Song = std::map<std::string, std::string>;
 

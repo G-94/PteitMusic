@@ -52,6 +52,7 @@ int SongTracklistItem::getSongID() const
 void SongTracklistItem::onClickedbtnLike()
 {
     btnLike->setText("Unlike");
+    disconnect(btnLike, nullptr, nullptr, nullptr);
     connect(btnLike, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnUnlike);
     emit likeSongRequest(songID);
 }
@@ -69,6 +70,7 @@ void SongTracklistItem::onClickedbtnPlay()
 void SongTracklistItem::onClickedbtnUnlike()
 {
     btnLike->setText("Like");
+    disconnect(btnLike, nullptr, nullptr, nullptr);
     connect(btnLike, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnLike);
     emit unlikeSongRequest(songID);
 }

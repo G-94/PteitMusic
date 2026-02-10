@@ -16,6 +16,8 @@
 #include <QByteArray>
 #include <fstream>
 
+#include "MusicGlobals.h"
+
 class PlayerWidget : public QWidget
 {
     Q_OBJECT
@@ -33,11 +35,9 @@ private:
     QSlider* trackTimePos;
 
     QPushButton *btnPlay;
-    QPushButton *btnPause;
     QPushButton *btnPlayNext;
     QPushButton *btnPlayPrev;
     QPushButton *btnLike;
-    QPushButton *btnUnlike;
     QPushButton *btnDownload;
     QRadioButton *btnVolume;
 
@@ -47,7 +47,6 @@ private:
     QVBoxLayout* main_layout;
 
     std::vector<Song> currentPlaylist;
-    std::vector<Song> currentLikedPlaylist;
     int current_song_index = -1;
 
     MusicApi api;
@@ -61,7 +60,7 @@ private slots:
     void onClickedbtnPlayNext();
     void onClickedbtnPlayPrev();
     void onClickedbtnLike();
-    void onClikcedbtnUnlike();
+    void onClickedbtnUnlike();
     void onClickedbtnDownload();
     void onClickedbtnVolume(bool Muted);
     void onPlaybackStateChanged(QMediaPlayer::PlaybackState state);

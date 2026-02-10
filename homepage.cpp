@@ -76,7 +76,7 @@ homepage::homepage(QWidget *parent)
 void homepage::setPlaySelectedSong(std::vector<Song> tracklist, int ID)
 {
     qDebug() << "onplaySelected";
-    player->SetSong(tracklist, ID, liked_tracklist);
+    player->SetSong(tracklist, ID, MusicGlobal::current_liked_tracklist);
 }
 
 void homepage::setLikeSelectedSong(std::vector<Song> tracklist, int ID)
@@ -105,10 +105,10 @@ void homepage::setUnlikeSelectedSong(std::vector<Song> tracklist, int ID)
 
 void homepage::onLikesSongsUpdated(std::vector<Song> tracklist)
 {
-    liked_tracklist = tracklist;
-    pageSearch->setLikedSongsTracklist(liked_tracklist);
+    MusicGlobal::current_liked_tracklist = tracklist;
+    pageSearch->setLikedSongsTracklist(MusicGlobal::current_liked_tracklist);
     pageSearch->updateTracklist(tracklist);
-    player->checkLikes(liked_tracklist);
+    player->checkLikes(MusicGlobal::current_liked_tracklist);
 }
 
 

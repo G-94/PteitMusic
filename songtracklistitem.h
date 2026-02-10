@@ -12,6 +12,8 @@
 #include <QStackedWidget>
 #include <QLabel>
 
+#include "MusicGlobals.h"
+
 using Song = std::map<std::string, std::string>;
 
 class SongTracklistItem : public QWidget

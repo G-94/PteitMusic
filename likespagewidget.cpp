@@ -20,12 +20,10 @@ LikesPageWidget::LikesPageWidget(QWidget *parent)
     tracklist_widget = new ScrollableTrackList();
     main_layout->addWidget(tracklist_widget);
 
-    tracklist_widget->updateTracklist({}, {}, "liked_list");
     loadLikesSongs();
-    emit likesSongUpdated(current_liked_tracklist);
 
     QObject::connect(tracklist_widget, &ScrollableTrackList::setSongRequset, [this] (int songID) {
-        emit setPlaySong(current_liked_tracklist, songID);
+        emit setPlaySong(MusicGlobal::current_liked_tracklist, songID);
     });
 
     QObject::connect(tracklist_widget, &ScrollableTrackList::setUnlikeSong, [this] (int songID) {
@@ -37,18 +35,18 @@ LikesPageWidget::LikesPageWidget(QWidget *parent)
 void LikesPageWidget::addSongToLikes(const Song &song)
 {
     try {
-        for(const Song& existing_song : current_liked_tracklist) {
+        for(const Song& existing_song : MusicGlobal::current_liked_tracklist) {
             if(song.at("id") == existing_song.at("id")) {
                 qDebug() << "Song already in likes";
                 return;
             }
         }
 
-        current_liked_tracklist.push_back(song);
-        tracklist_widget->updateTracklist(current_liked_tracklist, {}, "liked_list");
+        MusicGlobal::current_liked_tracklist.push_back(song);
+        tracklist_widget->updateTracklist(MusicGlobal::current_liked_tracklist, {}, "liked_list");
         saveLikedSongsToFile();
 
-        emit likesSongUpdated(current_liked_tracklist);
+        emit likesSongUpdated(MusicGlobal::current_liked_tracklist);
     } catch (...) {
         qDebug() << "something went wrong while adding song to Likes";
     }
@@ -57,14 +55,14 @@ void LikesPageWidget::addSongToLikes(const Song &song)
 void LikesPageWidget::removeSongFromLikes(const std::string &songID)
 {
     try {
-        auto it = std::remove_if(current_liked_tracklist.begin(), current_liked_tracklist.end(),
+        auto it = std::remove_if(MusicGlobal::current_liked_tracklist.begin(), MusicGlobal::current_liked_tracklist.end(),
                                  [&songID] (Song& song) {return song.at("id") == songID;});
 
-        if(it != current_liked_tracklist.end()) {
-            current_liked_tracklist.erase(it);
-            tracklist_widget->updateTracklist(current_liked_tracklist, {}, "liked_list");
+        if(it != MusicGlobal::current_liked_tracklist.end()) {
+            MusicGlobal::current_liked_tracklist.erase(it);
+            tracklist_widget->updateTracklist(MusicGlobal::current_liked_tracklist, {}, "liked_list");
             saveLikedSongsToFile();
-            emit likesSongUpdated(current_liked_tracklist);
+            emit likesSongUpdated(MusicGlobal::current_liked_tracklist);
 
             qDebug() << "Song removed from likes";
         }
@@ -79,8 +77,8 @@ void LikesPageWidget::loadLikesSongs()
     QFile file(likesPath);
 
     if(!file.exists()) {
-        current_liked_tracklist.clear();
-        tracklist_widget->setTracklist(current_liked_tracklist, {}, "liked_list");
+        MusicGlobal::current_liked_tracklist.clear();
+        tracklist_widget->setTracklist(MusicGlobal::current_liked_tracklist, {}, "liked_list");
         return;
     }
 
@@ -96,17 +94,17 @@ void LikesPageWidget::loadLikesSongs()
     try {
         json j = json::parse(jsonStr.toStdString());
 
-        current_liked_tracklist.clear();
+        MusicGlobal::current_liked_tracklist.clear();
 
         for(const auto& item : j) {
             if(item.is_object()) {
                 Song song = jsonToSong(item);
-                current_liked_tracklist.push_back(song);
+                MusicGlobal::current_liked_tracklist.push_back(song);
             }
         }
 
-        tracklist_widget->setTracklist(current_liked_tracklist, {}, "liked_list");
-        qDebug() << "loaded" << current_liked_tracklist.size() << "liked songs";
+        tracklist_widget->setTracklist(MusicGlobal::current_liked_tracklist, {}, "liked_list");
+        qDebug() << "loaded" << MusicGlobal::current_liked_tracklist.size() << "liked songs";
     } catch (const json::exception& e) {
         qDebug() << e.what();
     } catch (const std::exception& e) {
@@ -116,7 +114,7 @@ void LikesPageWidget::loadLikesSongs()
 
 std::vector<Song> LikesPageWidget::getLikedSongs()
 {
-    return current_liked_tracklist;
+    return MusicGlobal::current_liked_tracklist;
 }
 
 void LikesPageWidget::saveLikedSongsToFile()
@@ -124,7 +122,7 @@ void LikesPageWidget::saveLikedSongsToFile()
     try {
         json j = json::array();
 
-        for(const auto& song : current_liked_tracklist) {
+        for(const auto& song : MusicGlobal::current_liked_tracklist) {
             j.push_back(songToJson(song));
         }
 
@@ -140,7 +138,7 @@ void LikesPageWidget::saveLikedSongsToFile()
         out << QString::fromStdString(jsonStr);
         file.close();
 
-        qDebug() << "Saved" << current_liked_tracklist.size() << "songs to likes file";
+        qDebug() << "Saved" << MusicGlobal::current_liked_tracklist.size() << "songs to likes file";
     } catch (...) {
         qDebug() << "error while saving liked songs to file";
     }

@@ -17,6 +17,7 @@
 #include "searchpanelwidget.h"
 #include "playerwidget.h"
 #include "likespagewidget.h"
+#include "MusicGlobals.h"
 
 using Song = std::map<std::string, std::string>;
 
@@ -42,9 +43,6 @@ private:
     QPushButton* btnDownloadedPage;
 
     PlayerWidget* player;
-
-    std::vector<Song> liked_tracklist;
-    std::vector<Song> downloaded_tracklist;
 
 private slots:
 

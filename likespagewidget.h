@@ -9,6 +9,7 @@
 
 #include <include/nlohmann/json/json.hpp>
 #include "scrollabletracklist.h"
+#include "MusicGlobals.h"
 
 using json = nlohmann::json;
 using Song = std::map<std::string, std::string>;
@@ -27,7 +28,6 @@ public:
 
 private:
 
-    std::vector<Song> current_liked_tracklist;
     QVBoxLayout* main_layout;
     ScrollableTrackList* tracklist_widget;
     QLabel* page_discription;

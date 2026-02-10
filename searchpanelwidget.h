@@ -13,6 +13,7 @@
 
 #include "scrollabletracklist.h"
 #include "musicapi.h"
+#include "MusicGlobals.h"
 
 class SearchPanelWidget : public QWidget
 {
@@ -32,8 +33,6 @@ private:
 
     ScrollableTrackList* search_result;
     MusicApi api;
-
-    std::vector<Song> likedSongsTracklist;
 
 private slots:
 
