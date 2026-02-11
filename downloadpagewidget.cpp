@@ -19,7 +19,7 @@ DownloadPageWidget::DownloadPageWidget(QWidget *parent)
 
 void DownloadPageWidget::addSongToDownloads(const Song &song)
 {
-    for(const auto& downloaded_song : current_downloaded_tracklist) {
+    for(const auto& downloaded_song : MusicGlobal::current_downloaded_tracklist) {
         if(song.at("id") == downloaded_song.at("id")) {
             qDebug() << "Song already in downloaded";
             return;
@@ -34,8 +34,11 @@ void DownloadPageWidget::addSongToDownloads(const Song &song)
             song_file.write(song_data.constData(), song_data.size());
             song_file.close();
 
-            current_downloaded_tracklist.push_back(song);
-            tracklist_widget->updateTracklist(current_downloaded_tracklist, MusicGlobal::current_liked_tracklist, "downloads_list");
+            MusicGlobal::current_downloaded_tracklist.push_back(song);
+            tracklist_widget->updateTracklist(MusicGlobal::current_downloaded_tracklist);
+            loadDownloadsSongs();
+
+            emit downloadedSongsUpdated();
         }
 
 
@@ -52,6 +55,40 @@ void DownloadPageWidget::removeSongFromDownloads(const std::string &songID)
 
 void DownloadPageWidget::loadDownloadsSongs()
 {
+
+    QFile file(downloadsJsonPath);
+
+    if(!file.exists()) {
+        MusicGlobal::current_downloaded_tracklist.clear();
+        tracklist_widget->setTracklist(MusicGlobal::current_downloaded_tracklist);
+    }
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "failed to read json";
+        return;
+    }
+
+    QTextStream in(&file);
+    QString strData = in.readAll();
+    file.close();
+
+    try {
+        json j = json::parse(strData.toStdString());
+
+        for(const auto& item : j) {
+            if(item.is_object()) {
+                Song song = jsonToSong(item);
+                MusicGlobal::current_downloaded_tracklist.push_back(song);
+            }
+        }
+
+        tracklist_widget->setTracklist(MusicGlobal::current_downloaded_tracklist);
+        qDebug() << "downloaded tracklist build correct";
+    } catch (const json::exception& e) {
+        qDebug() << "catch json exc in loadDownloadedSongs" << e.what();
+    } catch (const std::exception& e) {
+        qDebug() << "catch std::exception exc in loadDownloadedSongs" << e.what();
+    }
 
 }
 

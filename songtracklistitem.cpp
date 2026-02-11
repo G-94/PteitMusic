@@ -1,6 +1,6 @@
 #include "songtracklistitem.h"
 
-SongTracklistItem::SongTracklistItem(Song song, int ID, const QString& params) : songID{ID}
+SongTracklistItem::SongTracklistItem(Song song, int ID, const std::vector<QString>& params) : songID{ID}
 {
     main_layout = new QHBoxLayout(this);
     QVBoxLayout* song_title_layout = new QVBoxLayout();
@@ -18,14 +18,24 @@ SongTracklistItem::SongTracklistItem(Song song, int ID, const QString& params) :
 
     main_layout->addLayout(song_title_layout);
 
-    if(params.isEmpty()) {
-        btnLike = new QPushButton("Like");
-    } else if (params == "liked") {
+    if (std::find(params.begin(), params.end(), "liked") != params.end()) {
         btnLike = new QPushButton("Unlike");
+        connect(btnLike, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnUnlike);
+    } else {
+        btnLike = new QPushButton("Like");
+        connect(btnLike, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnLike);
     }
+
+    if (std::find(params.begin(), params.end(), "downloaded") != params.end()) {
+        btnDownload = new QPushButton("Delete");
+        connect(btnDownload, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnDelete);
+    } else {
+        btnDownload = new QPushButton("Download");
+        connect(btnDownload, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnDownload);
+    }
+
     main_layout->addWidget(btnLike);
 
-    btnDownload = new QPushButton("Download");
     main_layout->addWidget(btnDownload);
 
     btnPlay = new QPushButton("PLay");
@@ -33,15 +43,7 @@ SongTracklistItem::SongTracklistItem(Song song, int ID, const QString& params) :
 
     qDebug() << "SongItemConstrucvt";
 
-    if(params.isEmpty()) {
-        connect(btnLike, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnLike);
-    } else if (params == "liked") {
-        connect(btnLike, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnUnlike);
-    }
-
-    connect(btnDownload, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnDownload);
     connect(btnPlay, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnPlay);
-
 }
 
 int SongTracklistItem::getSongID() const
@@ -59,7 +61,18 @@ void SongTracklistItem::onClickedbtnLike()
 
 void SongTracklistItem::onClickedbtnDownload()
 {
+    btnDownload->setText("Delete");
+    disconnect(btnDownload, nullptr, nullptr, nullptr);
+    connect(btnDownload, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnDelete);
     emit downloadSongRequest(songID);
+}
+
+void SongTracklistItem::onClickedbtnDelete()
+{
+    btnDownload->setText("Download");
+    disconnect(btnDownload, nullptr, nullptr, nullptr);
+    connect(btnDownload, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnDownload);
+    emit deleteSongRequest(songID);
 }
 
 void SongTracklistItem::onClickedbtnPlay()

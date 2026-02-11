@@ -1,7 +1,5 @@
 #include "scrollabletracklist.h"
 
-
-
 ScrollableTrackList::ScrollableTrackList(const std::vector<Song>& tracklist_) : current_tracklist{tracklist_}
 {
     QVBoxLayout* main_layout = new QVBoxLayout(this);
@@ -18,12 +16,12 @@ ScrollableTrackList::ScrollableTrackList(const std::vector<Song>& tracklist_) : 
     main_layout->addWidget(scrollArea);
 
     if(!tracklist_.empty()) {
-        setTracklist(tracklist_, {});
+        setTracklist(tracklist_);
     }
 
 }
 
-void ScrollableTrackList::setTracklist(const std::vector<Song>& tracklist_, const std::vector<Song>& liked_songs, const QString& params)
+void ScrollableTrackList::setTracklist(const std::vector<Song>& tracklist_)
 {
     clear();
 
@@ -34,26 +32,23 @@ void ScrollableTrackList::setTracklist(const std::vector<Song>& tracklist_, cons
     int counter = 0;
     for(auto song : current_tracklist) {
 
-        SongTracklistItem* item;
+        std::vector<QString> params_for_item = {};
 
-        bool isLiked = false;
-
-        if(params.isEmpty()) {
-            for(auto& liked_song : liked_songs) {
-                if(song.at("id") == liked_song.at("id")) {
-                    isLiked = true;
-                    break;
-                }
+        for(auto& liked_song : MusicGlobal::current_liked_tracklist) {
+            if(song.at("id") == liked_song.at("id")) {
+                params_for_item.push_back("liked");
+                break;
             }
-        } else if(params == "liked_list") {
-            isLiked = true;
         }
 
-        if(!isLiked) {
-            item = new SongTracklistItem(song, counter);
-        } else {
-            item = new SongTracklistItem(song, counter, "liked");
+        for(auto& downloaded_song : MusicGlobal::current_downloaded_tracklist) {
+            if(song.at("id") == downloaded_song.at("id")) {
+                params_for_item.push_back("downloaded");
+                break;
+            }
         }
+
+        SongTracklistItem* item = new SongTracklistItem(song, counter, params_for_item);
 
         trackItems.append(item);
         list_layout->addWidget(item);
@@ -62,6 +57,7 @@ void ScrollableTrackList::setTracklist(const std::vector<Song>& tracklist_, cons
         QObject::connect(item, &SongTracklistItem::settingSongRequest, this, &ScrollableTrackList::onPlayRequest);
         QObject::connect(item, &SongTracklistItem::likeSongRequest, this, &ScrollableTrackList::onLikeRequest);
         QObject::connect(item, &SongTracklistItem::downloadSongRequest, this, &ScrollableTrackList::onDownloadRequest);
+        QObject::connect(item, &SongTracklistItem::deleteSongRequest, this, &ScrollableTrackList::onDeleteRequest);
         QObject::connect(item, &SongTracklistItem::unlikeSongRequest, this, &ScrollableTrackList::onUnlikeRequest);
     }
 
@@ -70,12 +66,12 @@ void ScrollableTrackList::setTracklist(const std::vector<Song>& tracklist_, cons
 
 }
 
-void ScrollableTrackList::updateTracklist(const std::vector<Song>& tracklist_, const std::vector<Song>& liked_songs, const QString &params)
+void ScrollableTrackList::updateTracklist(const std::vector<Song>& tracklist_)
 {
     QScrollBar* scrollBar = scrollArea->verticalScrollBar();
     int scrollPosition = scrollBar->value();
 
-    setTracklist(tracklist_, liked_songs, params);
+    setTracklist(tracklist_);
 
     QMetaObject::invokeMethod(this, [scrollBar, scrollPosition]() {
         scrollBar->setValue(scrollPosition);
@@ -114,6 +110,11 @@ void ScrollableTrackList::onLikeRequest(int ID)
 void ScrollableTrackList::onDownloadRequest(int ID)
 {
     emit setDownloadSong(ID);
+}
+
+void ScrollableTrackList::onDeleteRequest(int ID)
+{
+    emit setDeleteSong(ID);
 }
 
 void ScrollableTrackList::onPlayRequest(int ID)

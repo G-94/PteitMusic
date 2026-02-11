@@ -18,8 +18,8 @@ class ScrollableTrackList : public QWidget
 public:
     explicit ScrollableTrackList(const std::vector<Song>& tracklist_ = std::vector<Song>());
 
-    void setTracklist(const std::vector<Song>& tracklist_, const std::vector<Song>& liked_songs, const QString& params = "");
-    void updateTracklist(const std::vector<Song>& tracklist_, const std::vector<Song>& liked_songs, const QString& params = "");
+    void setTracklist(const std::vector<Song>& tracklist_);
+    void updateTracklist(const std::vector<Song>& tracklist_);
 
     void clear();
 
@@ -39,6 +39,7 @@ private slots:
 
     void onLikeRequest(int ID);
     void onDownloadRequest(int ID);
+    void onDeleteRequest(int ID);
     void onPlayRequest(int ID);
     void onUnlikeRequest(int ID);
 
@@ -47,6 +48,7 @@ signals:
     void setLikeSong(int ID);
     void setUnlikeSong(int ID);
     void setDownloadSong(int ID);
+    void setDeleteSong(int ID);
     void setSongRequset(int ID);
 };
 

@@ -20,7 +20,7 @@ class SongTracklistItem : public QWidget
 {
     Q_OBJECT
 public:
-    explicit SongTracklistItem(Song song, int ID, const QString& params = "");
+    explicit SongTracklistItem(Song song, int ID, const std::vector<QString>& params = {});
 
     int getSongID() const;
 
@@ -37,6 +37,7 @@ private slots:
 
     void onClickedbtnLike();
     void onClickedbtnDownload();
+    void onClickedbtnDelete();
     void onClickedbtnPlay();
     void onClickedbtnUnlike();
 
@@ -44,6 +45,7 @@ signals:
 
     void likeSongRequest(int songID);
     void downloadSongRequest(int songID);
+    void deleteSongRequest(int SongID);
     void settingSongRequest(int songID);
     void unlikeSongRequest(int songID);
 };

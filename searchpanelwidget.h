@@ -40,6 +40,7 @@ private slots:
     void setLikedSelectedSong(int ID);
     void setUnlikedSelectedSong(int ID);
     void setDownloadedSelectedSong(int ID);
+    void setDeleteSelectedSong(int ID);
     void setPlaySelectedSong(int ID);
 
 signals:
@@ -48,6 +49,7 @@ signals:
     void likeSelectedSong(std::vector<Song> tracklist, int ID);
     void unlikeSelectedSong(std::vector<Song> tracklist, int ID);
     void downloadSelectedSong(std::vector<Song> tracklist, int ID);
+    void deleteSelectedSong(std::vector<Song> tracklist, int ID);
     void playSelectedSong(std::vector<Song> tracklist, int ID);
 
 };

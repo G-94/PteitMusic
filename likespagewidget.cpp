@@ -43,7 +43,7 @@ void LikesPageWidget::addSongToLikes(const Song &song)
         }
 
         MusicGlobal::current_liked_tracklist.push_back(song);
-        tracklist_widget->updateTracklist(MusicGlobal::current_liked_tracklist, {}, "liked_list");
+        tracklist_widget->updateTracklist(MusicGlobal::current_liked_tracklist);
         saveLikedSongsToFile();
 
         emit likesSongUpdated(MusicGlobal::current_liked_tracklist);
@@ -60,7 +60,7 @@ void LikesPageWidget::removeSongFromLikes(const std::string &songID)
 
         if(it != MusicGlobal::current_liked_tracklist.end()) {
             MusicGlobal::current_liked_tracklist.erase(it);
-            tracklist_widget->updateTracklist(MusicGlobal::current_liked_tracklist, {}, "liked_list");
+            tracklist_widget->updateTracklist(MusicGlobal::current_liked_tracklist);
             saveLikedSongsToFile();
             emit likesSongUpdated(MusicGlobal::current_liked_tracklist);
 
@@ -78,7 +78,7 @@ void LikesPageWidget::loadLikesSongs()
 
     if(!file.exists()) {
         MusicGlobal::current_liked_tracklist.clear();
-        tracklist_widget->setTracklist(MusicGlobal::current_liked_tracklist, {}, "liked_list");
+        tracklist_widget->setTracklist(MusicGlobal::current_liked_tracklist);
         return;
     }
 
@@ -103,7 +103,7 @@ void LikesPageWidget::loadLikesSongs()
             }
         }
 
-        tracklist_widget->setTracklist(MusicGlobal::current_liked_tracklist, {}, "liked_list");
+        tracklist_widget->setTracklist(MusicGlobal::current_liked_tracklist);
         qDebug() << "loaded" << MusicGlobal::current_liked_tracklist.size() << "liked songs";
     } catch (const json::exception& e) {
         qDebug() << e.what();

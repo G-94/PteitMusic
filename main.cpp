@@ -7,6 +7,9 @@
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
 
+    MusicGlobal::current_liked_tracklist = {};
+    MusicGlobal::current_downloaded_tracklist = {};
+
     homepage pl;
     pl.setFixedSize(1280, 720);
 

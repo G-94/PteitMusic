@@ -28,6 +28,8 @@ qt_add_executable(appPteitMusic
     songtracklistitem.h songtracklistitem.cpp
     scrollabletracklist.h scrollabletracklist.cpp
     likespagewidget.h likespagewidget.cpp
+    downloadpagewidget.h downloadpagewidget.cpp
+    MusicGlobals.h
 )
 
 # Подключаем заголовочные файлы

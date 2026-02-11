@@ -28,7 +28,6 @@ public:
 
 private:
 
-    std::vector<Song> current_downloaded_tracklist;
     std::map<std::string, std::string> current_downloaded_paths;
 
     QVBoxLayout* main_layout;
@@ -45,6 +44,10 @@ private:
     json songToJson(const Song& song);
 
 signals:
+
+    void downloadedSongsUpdated();
+    void setPlaySong(const Song& song);
+    void setLikedSong(const Song& song);
 
 
 };
