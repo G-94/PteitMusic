@@ -16,6 +16,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Network
 )
 
+
 # Создаем исполняемый файл
 qt_add_executable(appPteitMusic
     main.cpp
@@ -64,3 +65,4 @@ if(WIN32)
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
     endif()
 endif()
+
