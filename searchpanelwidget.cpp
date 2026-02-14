@@ -26,16 +26,12 @@ SearchPanelWidget::SearchPanelWidget(QWidget *parent)
     QObject::connect(search_result, &ScrollableTrackList::setSongRequset, this, &SearchPanelWidget::setPlaySelectedSong);
     QObject::connect(search_result, &ScrollableTrackList::setLikeSong, this, &SearchPanelWidget::setLikedSelectedSong);
     QObject::connect(search_result, &ScrollableTrackList::setDownloadSong, this, &SearchPanelWidget::setDownloadedSelectedSong);
+    QObject::connect(search_result, &ScrollableTrackList::setDeleteSong, this, &SearchPanelWidget::setDeleteSelectedSong);
     QObject::connect(search_result, &ScrollableTrackList::setUnlikeSong, this, &SearchPanelWidget::setUnlikedSelectedSong);
 
     QObject::connect(&api, &MusicApi::querySearchFinished, this, [this] (const std::vector<Song>& songs) {
         search_result->setTracklist(songs);
     });
-}
-
-void SearchPanelWidget::setLikedSongsTracklist(std::vector<Song> new_tracklist)
-{
-    MusicGlobal::current_liked_tracklist = new_tracklist;
 }
 
 void SearchPanelWidget::onClickedSearchbtn()
@@ -69,8 +65,7 @@ void SearchPanelWidget::setPlaySelectedSong(int ID)
     emit playSelectedSong(search_result->getTracklist(), ID);
 }
 
-void SearchPanelWidget::updateTracklist(const std::vector<Song>& songs)
+void SearchPanelWidget::updateTracklist()
 {
-    MusicGlobal::current_liked_tracklist = songs;
     search_result->updateTracklist(search_result->getTracklist());
 }

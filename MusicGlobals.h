@@ -13,5 +13,4 @@ inline std::vector<Song> current_liked_tracklist;
 inline std::vector<Song> current_downloaded_tracklist;
 
 }
-
 #endif // MUSICGLOBALS_H

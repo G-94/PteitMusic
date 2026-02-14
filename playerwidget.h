@@ -24,8 +24,10 @@ class PlayerWidget : public QWidget
 public:
     explicit PlayerWidget(QWidget *parent = nullptr);
 
-    void SetSong(const std::vector<Song>& playlist, int current_song_index, std::vector<Song>& likedSongs);
-    void checkLikes(const std::vector<Song>& likedTracklist);
+    void SetSong(const std::vector<Song>& playlist, int current_song_index, const QString& param = "");
+
+    void checkLikes();
+    void checkDownloads();
 
 private:
 
@@ -46,6 +48,7 @@ private:
 
     QVBoxLayout* main_layout;
 
+    QString current_param;
     std::vector<Song> currentPlaylist;
     int current_song_index = -1;
 
@@ -62,6 +65,7 @@ private slots:
     void onClickedbtnLike();
     void onClickedbtnUnlike();
     void onClickedbtnDownload();
+    void onClickedbtnDelete();
     void onClickedbtnVolume(bool Muted);
     void onPlaybackStateChanged(QMediaPlayer::PlaybackState state);
     void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
@@ -70,6 +74,8 @@ signals:
 
     void likeSongRequest(std::vector<Song> tracklist, int ID);
     void unlikeSongRequest(std::vector<Song> tracklist, int ID);
+    void downloadSongRequest(std::vector<Song> tracklist, int ID);
+    void deleteSongRequest(std::vector<Song> tracklist, int ID);
 };
 
 #endif // PLAYERWIDGET_H

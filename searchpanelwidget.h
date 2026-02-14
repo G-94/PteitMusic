@@ -21,8 +21,7 @@ class SearchPanelWidget : public QWidget
 public:
     explicit SearchPanelWidget(QWidget *parent = nullptr);
 
-    void setLikedSongsTracklist(std::vector<Song> new_tracklist);
-    void updateTracklist(const std::vector<Song>& songs);
+    void updateTracklist();
 
 private:
 

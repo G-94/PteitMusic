@@ -81,20 +81,20 @@ void ScrollableTrackList::updateTracklist(const std::vector<Song>& tracklist_)
 
 void ScrollableTrackList::clear()
 {
-    for(auto* item : trackItems) {
-        list_layout->removeWidget(item);
-        delete item;
+    qDebug() << "Clearing" << trackItems.size() << "items";
+
+    while (list_layout->count() > 0) {
+        QLayoutItem* item = list_layout->takeAt(0);
+        if (item->spacerItem()) {
+            delete item;
+        } else if (item->widget()) {
+            list_layout->removeWidget(item->widget());
+            item->widget()->deleteLater();
+            delete item;
+        }
     }
 
     trackItems.clear();
-
-    QLayoutItem *child;
-    while ((child = list_layout->takeAt(0)) != nullptr) {
-        if (child->widget()) {
-            delete child->widget();
-        }
-        delete child;
-    }
 }
 
 std::vector<Song> ScrollableTrackList::getTracklist() const

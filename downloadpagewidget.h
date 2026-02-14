@@ -7,6 +7,8 @@
 #include <QDir>
 #include <QFile>
 #include <fstream>
+#include <QtConcurrent>
+
 
 #include <include/nlohmann/json/json.hpp>
 #include "scrollabletracklist.h"
@@ -23,8 +25,10 @@ public:
     explicit DownloadPageWidget(QWidget *parent = nullptr);
 
     void addSongToDownloads(const Song& song);
-    void removeSongFromDownloads(const std::string& songID);
+    void removeSongFromDownloads(std::string songID);
     void loadDownloadsSongs();
+
+    void updateTracklist();
 
 private:
 
@@ -36,19 +40,25 @@ private:
 
     MusicApi api;
 
+    QFutureWatcher<QByteArray> downloadWatcher;
+    QFutureWatcher<bool> deleteWatcher;
+
     QString downloadsDir = "Downloads";
     QString downloadsJsonPath = "Data/DownloadsList/downloads.json";
+    QString pendingDownloadUrl;
 
     void saveDownloadsSongsToJson();
     Song jsonToSong(const json& j);
     json songToJson(const Song& song);
 
+    std::string clearPathName(const std::string& path);
+
 signals:
 
     void downloadedSongsUpdated();
-    void setPlaySong(const Song& song);
-    void setLikedSong(const Song& song);
-
+    void setPlaySong(std::vector<Song> tracklist, int ID);
+    void setLikedSong(std::vector<Song> tracklist, int ID);
+    void setUnlikedSong(std::vector<Song> tracklist, int ID);
 
 };
 

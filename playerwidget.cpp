@@ -88,14 +88,13 @@ PlayerWidget::PlayerWidget(QWidget *parent)
     });
 
     QObject::connect(player, &QMediaPlayer::mediaStatusChanged, this, &PlayerWidget::onMediaStatusChanged);
-
 }
 
-void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_song_index, std::vector<Song> &likedSongs)
+void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_song_index, const QString& param)
 {
     currentPlaylist = playlist;
-    MusicGlobal::current_liked_tracklist = likedSongs;
     current_song_index = temp_current_song_index;
+    current_param = param;
 
     if(currentPlaylist.empty()) {
         btnPlay->setEnabled(false);
@@ -117,11 +116,28 @@ void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_s
 
     Song song = currentPlaylist[current_song_index];
 
-    checkLikes(MusicGlobal::current_liked_tracklist);
+    checkLikes();
+    checkDownloads();
 
     player->setSource(QUrl());
 
     try {
+
+        if(current_param == "from_source") {
+            std::string song_title = song["title"] + " - " + song["artist"];
+            track_title->setText(QString::fromStdString(song_title));
+
+            player->setSource(QUrl::fromLocalFile(QString::fromStdString(song.at("path"))));
+            player->setPosition(0);
+            btnLike->setEnabled(true);
+            btnDownload->setEnabled(true);
+            btnPlay->setEnabled(true);
+            track_dur->setText("00:00");
+            onClickedbtnPlay();
+
+            return;
+        }
+
         std::string songString_url = song["url"];
         QByteArray songData = api.downloadSong(QString::fromStdString(songString_url));
 
@@ -139,6 +155,7 @@ void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_s
                 player->setSource(QUrl::fromLocalFile(temp_file_location));
                 player->setPosition(0);
                 btnLike->setEnabled(true);
+                btnDownload->setEnabled(true);
                 btnPlay->setEnabled(true);
                 track_dur->setText("00:00");
                 onClickedbtnPlay();
@@ -172,7 +189,7 @@ void PlayerWidget::checkNextAndPrev()
     }
 }
 
-void PlayerWidget::checkLikes(const std::vector<Song>& likedTracklist)
+void PlayerWidget::checkLikes()
 {
     if(currentPlaylist.empty() || current_song_index < 0) return;
     Song song = currentPlaylist[current_song_index];
@@ -180,7 +197,7 @@ void PlayerWidget::checkLikes(const std::vector<Song>& likedTracklist)
     disconnect(btnLike, nullptr, nullptr, nullptr);
 
     bool isLiked = false;
-    for(const auto& liked_song : likedTracklist) {
+    for(const auto& liked_song : MusicGlobal::current_liked_tracklist) {
         if(song.at("id") == liked_song.at("id")) {
             isLiked = true;
         }
@@ -192,6 +209,32 @@ void PlayerWidget::checkLikes(const std::vector<Song>& likedTracklist)
     } else {
         btnLike->setText("Like");
         connect(btnLike, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnLike);
+    }
+
+}
+
+void PlayerWidget::checkDownloads()
+{
+    if(currentPlaylist.empty() || current_song_index < 0) return;
+    Song song = currentPlaylist[current_song_index];
+
+    disconnect(btnDownload, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnDownload);
+    disconnect(btnDownload, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnDelete);
+
+    bool isDownloaded = false;
+    for(const Song& downloaded_song : MusicGlobal::current_downloaded_tracklist) {
+        if(song.at("id") == downloaded_song.at("id")) {
+            isDownloaded = true;
+            break;
+        }
+    }
+
+    if(isDownloaded) {
+        btnDownload->setText("Delete");
+        connect(btnDownload, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnDelete);
+    } else {
+        btnDownload->setText("Download");
+        connect(btnDownload, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnDownload);
     }
 
 }
@@ -225,7 +268,11 @@ void PlayerWidget::onClickedbtnPlayNext()
 
     int nextSongIndex = current_song_index + 1;
     if (nextSongIndex < currentPlaylist.size()) {
-        SetSong(currentPlaylist, nextSongIndex, MusicGlobal::current_liked_tracklist);
+        if(current_param == "from_source") {
+            SetSong(currentPlaylist, nextSongIndex, "from_source");
+        } else {
+            SetSong(currentPlaylist, nextSongIndex);
+        }
         onClickedbtnPlay();
     }
     else qDebug() << "No next track in playlist";
@@ -237,7 +284,12 @@ void PlayerWidget::onClickedbtnPlayPrev()
 
     int nextSongIndex = current_song_index - 1;
     if (nextSongIndex >= 0) {
-        SetSong(currentPlaylist, nextSongIndex, MusicGlobal::current_liked_tracklist);
+        if(current_param == "from_source") {
+            SetSong(currentPlaylist, nextSongIndex, "from_source");
+        } else {
+            SetSong(currentPlaylist, nextSongIndex);
+        }
+
         onClickedbtnPlay();
     }
     else qDebug() << "No next track in playlist";
@@ -263,9 +315,18 @@ void PlayerWidget::onClickedbtnUnlike()
 
 void PlayerWidget::onClickedbtnDownload()
 {
-    qDebug() << "Download button clicked";
-    // Здесь должна быть логика скачивания трека в постоянное хранилище
-    // Например, копирование из temp файла в папку с музыкой пользователя
+    btnDownload->setText("Delete");
+    disconnect(btnDownload, nullptr, nullptr, nullptr);
+    connect(btnDownload, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnDelete);
+    emit downloadSongRequest(currentPlaylist, current_song_index);
+}
+
+void PlayerWidget::onClickedbtnDelete()
+{
+    btnDownload->setText("Download");
+    disconnect(btnDownload, nullptr, nullptr, nullptr);
+    connect(btnDownload, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnDownload);
+    emit deleteSongRequest(currentPlaylist, current_song_index);
 }
 
 void PlayerWidget::onClickedbtnVolume(bool Muted)
@@ -289,7 +350,11 @@ void PlayerWidget::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
     switch(status) {
     case QMediaPlayer::EndOfMedia:
         if(current_song_index + 1 < currentPlaylist.size()) {
-            this->SetSong(currentPlaylist, current_song_index + 1, MusicGlobal::current_liked_tracklist);
+            if(current_param == "from_source") {
+                this->SetSong(currentPlaylist, current_song_index + 1, "from_source");
+            } else {
+                this->SetSong(currentPlaylist, current_song_index + 1);
+            }
         }
     }
 }

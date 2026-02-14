@@ -22,6 +22,8 @@ class SongTracklistItem : public QWidget
 public:
     explicit SongTracklistItem(Song song, int ID, const std::vector<QString>& params = {});
 
+    ~SongTracklistItem();
+
     int getSongID() const;
 
 private:

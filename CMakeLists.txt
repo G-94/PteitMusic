@@ -7,15 +7,15 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-# Добавили Core компонент
+# Добавили Concurrent компонент
 find_package(Qt6 REQUIRED COMPONENTS
-    Core        # <--- ДОБАВИЛИ ЭТО
+    Core
     Widgets
     Multimedia
     MultimediaWidgets
     Network
+    Concurrent        # <--- ДОБАВИЛИ ЭТО
 )
-
 
 # Создаем исполняемый файл
 qt_add_executable(appPteitMusic
@@ -36,14 +36,15 @@ qt_add_executable(appPteitMusic
 # Подключаем заголовочные файлы
 target_include_directories(appPteitMusic PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-# Подключаем библиотеки (добавили Qt6::Core)
+# Подключаем библиотеки (добавили Qt6::Concurrent)
 target_link_libraries(appPteitMusic
     PRIVATE
-        Qt6::Core       # <--- ДОБАВИЛИ ЭТО
+        Qt6::Core
         Qt6::Widgets
         Qt6::Multimedia
         Qt6::MultimediaWidgets
         Qt6::Network
+        Qt6::Concurrent    # <--- ДОБАВИЛИ ЭТО
 )
 
 # Windows библиотеки
@@ -65,4 +66,3 @@ if(WIN32)
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
     endif()
 endif()
-

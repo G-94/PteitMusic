@@ -26,6 +26,14 @@ LikesPageWidget::LikesPageWidget(QWidget *parent)
         emit setPlaySong(MusicGlobal::current_liked_tracklist, songID);
     });
 
+    QObject::connect(tracklist_widget, &ScrollableTrackList::setDownloadSong, [this] (int songID) {
+        emit setDownloadSong(MusicGlobal::current_liked_tracklist, songID);
+    });
+
+    QObject::connect(tracklist_widget, &ScrollableTrackList::setDeleteSong, [this] (int songID) {
+        emit setDeleteSong(MusicGlobal::current_liked_tracklist, songID);
+    });
+
     QObject::connect(tracklist_widget, &ScrollableTrackList::setUnlikeSong, [this] (int songID) {
         Song song = tracklist_widget->getTracklist()[songID];
         removeSongFromLikes(song.at("id"));
@@ -46,7 +54,7 @@ void LikesPageWidget::addSongToLikes(const Song &song)
         tracklist_widget->updateTracklist(MusicGlobal::current_liked_tracklist);
         saveLikedSongsToFile();
 
-        emit likesSongUpdated(MusicGlobal::current_liked_tracklist);
+        emit likesSongUpdated();
     } catch (...) {
         qDebug() << "something went wrong while adding song to Likes";
     }
@@ -62,7 +70,7 @@ void LikesPageWidget::removeSongFromLikes(const std::string &songID)
             MusicGlobal::current_liked_tracklist.erase(it);
             tracklist_widget->updateTracklist(MusicGlobal::current_liked_tracklist);
             saveLikedSongsToFile();
-            emit likesSongUpdated(MusicGlobal::current_liked_tracklist);
+            emit likesSongUpdated();
 
             qDebug() << "Song removed from likes";
         }
@@ -110,6 +118,11 @@ void LikesPageWidget::loadLikesSongs()
     } catch (const std::exception& e) {
         qDebug() << e.what();
     }
+}
+
+void LikesPageWidget::updateTracklist()
+{
+    tracklist_widget->updateTracklist(tracklist_widget->getTracklist());
 }
 
 std::vector<Song> LikesPageWidget::getLikedSongs()

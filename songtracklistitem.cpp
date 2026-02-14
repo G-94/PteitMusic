@@ -35,15 +35,20 @@ SongTracklistItem::SongTracklistItem(Song song, int ID, const std::vector<QStrin
     }
 
     main_layout->addWidget(btnLike);
-
     main_layout->addWidget(btnDownload);
 
-    btnPlay = new QPushButton("PLay");
+    btnPlay = new QPushButton("Play");
     main_layout->addWidget(btnPlay);
 
     qDebug() << "SongItemConstrucvt";
 
     connect(btnPlay, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnPlay);
+}
+
+SongTracklistItem::~SongTracklistItem()
+{
+    disconnect();
+    qDebug() << "SongTracklistItem deleted for ID:" << songID;
 }
 
 int SongTracklistItem::getSongID() const
@@ -61,18 +66,18 @@ void SongTracklistItem::onClickedbtnLike()
 
 void SongTracklistItem::onClickedbtnDownload()
 {
-    btnDownload->setText("Delete");
-    disconnect(btnDownload, nullptr, nullptr, nullptr);
-    connect(btnDownload, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnDelete);
     emit downloadSongRequest(songID);
+    btnDownload->setText("Delete");
+    disconnect(btnDownload, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnDownload);
+    connect(btnDownload, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnDelete);
 }
 
 void SongTracklistItem::onClickedbtnDelete()
 {
-    btnDownload->setText("Download");
-    disconnect(btnDownload, nullptr, nullptr, nullptr);
-    connect(btnDownload, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnDownload);
     emit deleteSongRequest(songID);
+    btnDownload->setText("Download");
+    disconnect(btnDownload, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnDelete);
+    connect(btnDownload, &QPushButton::clicked, this, &SongTracklistItem::onClickedbtnDownload);
 }
 
 void SongTracklistItem::onClickedbtnPlay()

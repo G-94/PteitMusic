@@ -17,6 +17,7 @@
 #include "searchpanelwidget.h"
 #include "playerwidget.h"
 #include "likespagewidget.h"
+#include "downloadpagewidget.h"
 #include "MusicGlobals.h"
 
 using Song = std::map<std::string, std::string>;
@@ -37,6 +38,7 @@ private:
     QStackedWidget* pages;
     SearchPanelWidget* pageSearch;
     LikesPageWidget* pageLikes;
+    DownloadPageWidget* pageDownloads;
 
     QPushButton* btnHomePage;
     QPushButton* btnLikePage;
@@ -48,16 +50,19 @@ private slots:
 
     void setPlaySelectedSong(std::vector<Song> tracklist, int ID);
 
-    void setLikeSelectedSong(std::vector<Song> tracklist, int ID);
+    void setPlaySelectedSongFromSource(std::vector<Song> tracklist, int ID);
 
-    void setDownloadSelectedSong(std::vector<Song> tracklist, int ID);
+    void setLikeSelectedSong(std::vector<Song> tracklist, int ID);
 
     void setUnlikeSelectedSong(std::vector<Song> tracklist, int ID);
 
-    void onLikesSongsUpdated(std::vector<Song> tracklist);
+    void setDownloadSelectedSong(std::vector<Song> tracklist, int ID);
 
+    void setDeleteSelectedSong(std::vector<Song> tracklist, int ID);
 
+    void onLikesSongsUpdated();
 
+    void onDownloadsSongsUpdated();
 
 signals:
 };

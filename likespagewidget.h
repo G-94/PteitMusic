@@ -24,6 +24,8 @@ public:
     void removeSongFromLikes(const std::string& songID);
     void loadLikesSongs();
 
+    void updateTracklist();
+
     std::vector<Song> getLikedSongs();
 
 private:
@@ -41,9 +43,10 @@ private:
 
 signals:
 
-    void likesSongUpdated(std::vector<Song> tracklist);
+    void likesSongUpdated();
     void setPlaySong(std::vector<Song> tracklist, int ID);
     void setDownloadSong(std::vector<Song> tracklist, int ID);
+    void setDeleteSong(std::vector<Song> tracklist, int ID);
 
 };
 
