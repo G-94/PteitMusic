@@ -17,33 +17,66 @@ void MusicApi::searchByQuery(const QString &query)
 
 void MusicApi::searchByGenre(const QString &genre)
 {
-    std::vector<Song> result;
-    std::vector<QPointer<QNetworkReply>> replies;
+    accumulatedResults.clear();
+    pendingReplies = 0;
 
     for(int page = 0; page <= 480; page += 48) {
         QString strUrl = "https://rus.hitmotop.com/genre/" + genre + "/start/" + QString::number(page);
         QNetworkRequest request(strUrl);
         QNetworkReply* reply = manager.get(request);
-        replies.push_back(reply);
+
+        pendingReplies++;
+        connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+            if(reply->error() == QNetworkReply::NoError) {
+                std::vector<Song> pagesSongs = parseHtml(reply->readAll());
+                accumulatedResults.insert(accumulatedResults.end(),
+                                          pagesSongs.begin(), pagesSongs.end());
+            }
+            reply->deleteLater();
+
+            pendingReplies--;
+            if(pendingReplies == 0) {
+                emit genreSearchFinished(accumulatedResults);
+            }
+        });
     }
+}
 
-    for(auto& reply : replies) {
-        if(!reply)
-            continue;
+void MusicApi::searchByArtist(const QString &artist)
+{
+    QUrl url("https://rus.hitmotop.com/search");
+    QUrlQuery param;
+    param.addQueryItem("q", artist);
+    url.setQuery(param);
 
-        QEventLoop loop;
-        QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-        loop.exec();
+    QNetworkRequest request(url);
+    QNetworkReply* reply = manager.get(request);
 
-        if(reply && reply->error() == QNetworkReply::NoError) {
-            std::vector<Song> pagesSongs = parseHtml(reply->readAll());
-            result.insert(result.end(), pagesSongs.begin(), pagesSongs.end());
+    connect(reply, &QNetworkReply::finished, this, [this, reply] () {
+        QString strReply = reply->readAll();
+        if(strReply.contains("<ul class=\"singers-list album-list\">")) {
+            std::vector<ArtistData> result;
+
+            auto artists_el = strReply.split("<ul class=\"singers-list album-list\">")[1].split("</ul>")[0].split("<li");
+            artists_el.pop_front();
+
+            for(const auto& el : artists_el) {
+                ArtistData artist;
+                artist.id = el.split(" <a href=\"/artist/")[1].split("\" class")[0].toStdString();
+                artist.name = el.split("album-title\">")[1].split("</span>")[0].toStdString();
+
+                result.push_back(artist);
+            }
+
+            emit artistSearchFinished(result);
         }
 
-        reply->deleteLater();
-    }
+    });
+}
 
-    emit genreSearchFinished(result);
+void MusicApi::getTracklistByArtistId(const QString &id)
+{
+
 }
 
 QByteArray MusicApi::downloadSong(const QString &url)

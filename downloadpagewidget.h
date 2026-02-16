@@ -9,7 +9,6 @@
 #include <fstream>
 #include <QtConcurrent>
 
-
 #include <include/nlohmann/json/json.hpp>
 #include "scrollabletracklist.h"
 #include "musicapi.h"
@@ -44,7 +43,7 @@ private:
     QFutureWatcher<bool> deleteWatcher;
 
     QString downloadsDir = "Downloads";
-    QString downloadsJsonPath = "Data/DownloadsList/downloads.json";
+    QString downloadsJsonPath = "Data/downloads.json";
     QString pendingDownloadUrl;
 
     void saveDownloadsSongsToJson();

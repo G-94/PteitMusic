@@ -118,6 +118,7 @@ void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_s
 
     checkLikes();
     checkDownloads();
+    checkNextAndPrev();
 
     player->setSource(QUrl());
 
@@ -175,6 +176,12 @@ void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_s
 void PlayerWidget::checkNextAndPrev()
 {
     if(current_song_index > 0) {
+        if(current_param == "genre_playlist") {
+            btnPlayPrev->setEnabled(false);
+            btnPlayNext->setEnabled(true);
+            return;
+        }
+
         btnPlayPrev->setEnabled(true);
         if(current_song_index < currentPlaylist.size() - 1) {
             btnPlayNext->setEnabled(true);
@@ -270,6 +277,13 @@ void PlayerWidget::onClickedbtnPlayNext()
     if (nextSongIndex < currentPlaylist.size()) {
         if(current_param == "from_source") {
             SetSong(currentPlaylist, nextSongIndex, "from_source");
+        } else if (current_param == "genre_playlist") {
+            int randomIndex;
+            do {
+                randomIndex = std::rand() % 480;
+            } while(randomIndex == current_song_index);
+
+            SetSong(currentPlaylist, randomIndex, "genre_playlist");
         } else {
             SetSong(currentPlaylist, nextSongIndex);
         }
@@ -281,6 +295,8 @@ void PlayerWidget::onClickedbtnPlayNext()
 void PlayerWidget::onClickedbtnPlayPrev()
 {
     if(currentPlaylist.empty() || current_song_index < 0) return;
+
+    if(current_param == "genre_playlist") return;
 
     int nextSongIndex = current_song_index - 1;
     if (nextSongIndex >= 0) {
@@ -352,6 +368,13 @@ void PlayerWidget::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
         if(current_song_index + 1 < currentPlaylist.size()) {
             if(current_param == "from_source") {
                 this->SetSong(currentPlaylist, current_song_index + 1, "from_source");
+            } else if (current_param == "genre_playlist") {
+                int randomIndex;
+                do {
+                    randomIndex = std::rand() % 480;
+                } while(randomIndex == current_song_index);
+
+                SetSong(currentPlaylist, randomIndex, "genre_playlist");
             } else {
                 this->SetSong(currentPlaylist, current_song_index + 1);
             }

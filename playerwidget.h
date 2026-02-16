@@ -14,7 +14,10 @@
 #include <QDir>
 #include <QTime>
 #include <QByteArray>
+#include <QRandomGenerator>
 #include <fstream>
+#include <cstdlib>
+#include <ctime>
 
 #include "MusicGlobals.h"
 

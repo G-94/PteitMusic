@@ -3,13 +3,13 @@
 LikesPageWidget::LikesPageWidget(QWidget *parent)
     : QWidget{parent}
 {
-    QDir dir(likesDir);
-    if(!dir.exists()) {
-        QDir().mkpath(likesDir);
-        dir.mkdir(".");
-        qDebug() << "Created likes directory:" << likesDir;
-    } else {
-        qDebug() << "Likes directory exists:" << likesDir;
+    QFile likesFile(likesPath);
+    if(!likesFile.exists()) {
+        if(likesFile.open(QIODevice::WriteOnly)) {
+            likesFile.write("[]");
+            likesFile.close();
+            qDebug() << "Created empty likes file:" << likesPath;
+        }
     }
 
     main_layout = new QVBoxLayout(this);

@@ -34,8 +34,7 @@ private:
     ScrollableTrackList* tracklist_widget;
     QLabel* page_discription;
 
-    QString likesDir = "Data/Likes";
-    QString likesPath = "Data/Likes/liked_songs.json";
+    QString likesPath = "Data/liked_songs.json";
 
     void saveLikedSongsToFile();
     Song jsonToSong(const json& j);

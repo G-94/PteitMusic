@@ -9,12 +9,14 @@ homepage::homepage(QWidget *parent)
 
     //
     left_pages_panel = new QFrame();
-    btnHomePage = new QPushButton();
+    btnPlaylistPage = new QPushButton();
+    btnSearchPage = new QPushButton();
     btnLikePage = new QPushButton();
     btnDownloadedPage = new QPushButton();
 
     QVBoxLayout *left_panel_layout = new QVBoxLayout();
-    left_panel_layout->addWidget(btnHomePage);
+    left_panel_layout->addWidget(btnPlaylistPage);
+    left_panel_layout->addWidget(btnSearchPage);
     left_panel_layout->addWidget(btnLikePage);
     left_panel_layout->addWidget(btnDownloadedPage);
 
@@ -29,6 +31,9 @@ homepage::homepage(QWidget *parent)
 
     right_panel = new QWidget();
     pages = new QStackedWidget();
+
+    pagePlaylists = new PlaylistsHubPageWidget();
+    pages->addWidget(pagePlaylists);
 
     pageSearch = new SearchPanelWidget();
     pages->addWidget(pageSearch);
@@ -54,7 +59,11 @@ homepage::homepage(QWidget *parent)
 
     this->setLayout(main_layout);
 
-    QObject::connect(btnHomePage, &QPushButton::clicked, this, [this] () {
+    QObject::connect(btnPlaylistPage, &QPushButton::clicked, this, [this] () {
+        pages->setCurrentWidget(pagePlaylists);
+    });
+
+    QObject::connect(btnSearchPage, &QPushButton::clicked, this, [this] () {
         pages->setCurrentWidget(pageSearch);
     });
 
@@ -82,11 +91,12 @@ homepage::homepage(QWidget *parent)
     QObject::connect(pageDownloads, &DownloadPageWidget::setLikedSong, this, &homepage::setLikeSelectedSong);
     QObject::connect(pageDownloads, &DownloadPageWidget::setUnlikedSong, this, &homepage::setUnlikeSelectedSong);
 
+    QObject::connect(pagePlaylists, &PlaylistsHubPageWidget::playGenrePlaylist, this, &homepage::setPlaySelectedGenrePlaylist);
+
     QObject::connect(player, &PlayerWidget::likeSongRequest, this, &homepage::setLikeSelectedSong);
     QObject::connect(player, &PlayerWidget::unlikeSongRequest, this, &homepage::setUnlikeSelectedSong);
     QObject::connect(player, &PlayerWidget::downloadSongRequest, this, &homepage::setDownloadSelectedSong);
     QObject::connect(player, &PlayerWidget::deleteSongRequest, this, &homepage::setDeleteSelectedSong);
-
 }
 
 void homepage::setPlaySelectedSong(std::vector<Song> tracklist, int ID)
@@ -99,6 +109,13 @@ void homepage::setPlaySelectedSongFromSource(std::vector<Song> tracklist, int ID
 {
     player->SetSong(tracklist, ID, "from_source");
     qDebug() << "onplayDownloaded";
+}
+
+void homepage::setPlaySelectedGenrePlaylist(std::vector<Song> tracklist, int ID, int genreId)
+{
+    pagePlaylists->incrementGenreCounter(genreId);
+    player->SetSong(tracklist, ID, "genre_playlist");
+    qDebug() << "onplaygenre";
 }
 
 void homepage::setLikeSelectedSong(std::vector<Song> tracklist, int ID)

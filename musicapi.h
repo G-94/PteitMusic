@@ -16,6 +16,7 @@
 #include <map>
 
 #include "include/nlohmann/json/json.hpp"
+#include "MusicGlobals.h"
 
 using json = nlohmann::json;
 using Song = std::map<std::string, std::string>;
@@ -27,6 +28,8 @@ public:
 
     void searchByQuery(const QString& query);
     void searchByGenre(const QString& genre);
+    void searchByArtist(const QString& artist);
+    void getTracklistByArtistId(const QString& id);
     QByteArray downloadSong(const QString& url);
 
 private slots:
@@ -37,12 +40,16 @@ signals:
 
     void querySearchFinished(const std::vector<Song>& songs);
     void genreSearchFinished(const std::vector<Song>& songs);
+    void artistSearchFinished(const std::vector<ArtistData>& artists_list);
     void error(const QString& e);
 
 private:
 
     QNetworkAccessManager manager;
     std::vector<Song> parseHtml(const QByteArray& data);
+
+    std::vector<Song> accumulatedResults;
+    int pendingReplies;
 
 };
 
