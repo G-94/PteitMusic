@@ -47,8 +47,6 @@ private:
     QString pendingDownloadUrl;
 
     void saveDownloadsSongsToJson();
-    Song jsonToSong(const json& j);
-    json songToJson(const Song& song);
 
     std::string clearPathName(const std::string& path);
 

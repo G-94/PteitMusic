@@ -32,8 +32,10 @@ qt_add_executable(appPteitMusic
     downloadpagewidget.h downloadpagewidget.cpp
     MusicGlobals.h
     playlistshubpagewidget.h playlistshubpagewidget.cpp
-    scrollableartistlist.h scrollableartistlist.cpp
+
     genrelistwidget.h genrelistwidget.cpp
+    artistslistwidget.h artistslistwidget.cpp
+    artistslistitem.h artistslistitem.cpp
 
 )
 

@@ -80,6 +80,7 @@ homepage::homepage(QWidget *parent)
     QObject::connect(pageSearch, &SearchPanelWidget::deleteSelectedSong, this, &homepage::setDeleteSelectedSong);
     QObject::connect(pageSearch, &SearchPanelWidget::likeSelectedSong, this, &homepage::setLikeSelectedSong);
     QObject::connect(pageSearch, &SearchPanelWidget::unlikeSelectedSong, this, &homepage::setUnlikeSelectedSong);
+    QObject::connect(pageSearch, &SearchPanelWidget::playArtistPlaylist, this, &homepage::setPlayPlaylistInRandomOrder);
 
     QObject::connect(pageLikes, &LikesPageWidget::setPlaySong, this, &homepage::setPlaySelectedSong);
     QObject::connect(pageLikes, &LikesPageWidget::likesSongUpdated, this, &homepage::onLikesSongsUpdated);
@@ -114,8 +115,14 @@ void homepage::setPlaySelectedSongFromSource(std::vector<Song> tracklist, int ID
 void homepage::setPlaySelectedGenrePlaylist(std::vector<Song> tracklist, int ID, int genreId)
 {
     pagePlaylists->incrementGenreCounter(genreId);
-    player->SetSong(tracklist, ID, "genre_playlist");
+    player->SetSong(tracklist, ID, "random_order");
     qDebug() << "onplaygenre";
+}
+
+void homepage::setPlayPlaylistInRandomOrder(std::vector<Song> tracklist, int ID)
+{
+    player->SetSong(tracklist, ID, "random_order");
+    qDebug() << "onplayrandom";
 }
 
 void homepage::setLikeSelectedSong(std::vector<Song> tracklist, int ID)

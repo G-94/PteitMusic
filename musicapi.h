@@ -29,8 +29,10 @@ public:
     void searchByQuery(const QString& query);
     void searchByGenre(const QString& genre);
     void searchByArtist(const QString& artist);
-    void getTracklistByArtistId(const QString& id);
+    void getTracklistByArtistId(const QString& id, bool isForPlay);
+    void getArtistDataBySongId(QString id);
     QByteArray downloadSong(const QString& url);
+
 
 private slots:
 
@@ -41,6 +43,8 @@ signals:
     void querySearchFinished(const std::vector<Song>& songs);
     void genreSearchFinished(const std::vector<Song>& songs);
     void artistSearchFinished(const std::vector<ArtistData>& artists_list);
+    void artistTracklistSearchFinished(const std::vector<Song>& songs, bool isForPlay);
+    void artistIdSearchBySongFinished(const ArtistData& artist_data);
     void error(const QString& e);
 
 private:

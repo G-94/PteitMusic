@@ -37,8 +37,6 @@ private:
     QString likesPath = "Data/liked_songs.json";
 
     void saveLikedSongsToFile();
-    Song jsonToSong(const json& j);
-    json songToJson(const Song& song);
 
 signals:
 

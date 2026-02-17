@@ -25,7 +25,7 @@ void MusicApi::searchByGenre(const QString &genre)
         QNetworkRequest request(strUrl);
         QNetworkReply* reply = manager.get(request);
 
-        pendingReplies++;
+        ++pendingReplies;
         connect(reply, &QNetworkReply::finished, this, [this, reply]() {
             if(reply->error() == QNetworkReply::NoError) {
                 std::vector<Song> pagesSongs = parseHtml(reply->readAll());
@@ -34,7 +34,7 @@ void MusicApi::searchByGenre(const QString &genre)
             }
             reply->deleteLater();
 
-            pendingReplies--;
+            --pendingReplies;
             if(pendingReplies == 0) {
                 emit genreSearchFinished(accumulatedResults);
             }
@@ -54,9 +54,9 @@ void MusicApi::searchByArtist(const QString &artist)
 
     connect(reply, &QNetworkReply::finished, this, [this, reply] () {
         QString strReply = reply->readAll();
-        if(strReply.contains("<ul class=\"singers-list album-list\">")) {
-            std::vector<ArtistData> result;
+        std::vector<ArtistData> result;
 
+        if(strReply.contains("<ul class=\"singers-list album-list\">")) {
             auto artists_el = strReply.split("<ul class=\"singers-list album-list\">")[1].split("</ul>")[0].split("<li");
             artists_el.pop_front();
 
@@ -67,16 +67,62 @@ void MusicApi::searchByArtist(const QString &artist)
 
                 result.push_back(artist);
             }
-
-            emit artistSearchFinished(result);
         }
 
+        emit artistSearchFinished(result);
     });
 }
 
-void MusicApi::getTracklistByArtistId(const QString &id)
+void MusicApi::getTracklistByArtistId(const QString &id, bool isForPlay)
 {
+    accumulatedResults.clear();
+    pendingReplies = 0;
 
+    for(int page = 0; page <= 480; page += 48) {
+        QUrl url("https://rus.hitmotop.com/artist/" + id + "/start/" + QString::number(page));
+        QNetworkRequest request(url);
+        QNetworkReply* reply = manager.get(request);
+
+        ++pendingReplies;
+        connect(reply, &QNetworkReply::finished, this, [this, reply, isForPlay] () {
+            if(reply->error() == QNetworkReply::NoError) {
+                std::vector<Song> pageSongs = parseHtml(reply->readAll());
+                accumulatedResults.insert(accumulatedResults.end(),
+                                          pageSongs.begin(), pageSongs.end());
+            }
+            reply->deleteLater();
+
+            --pendingReplies;
+            if(pendingReplies == 0) {
+                emit artistTracklistSearchFinished(accumulatedResults, isForPlay);
+            }
+        });
+    }
+}
+
+void MusicApi::getArtistDataBySongId(QString id)
+{
+    if(id.startsWith("t")) {
+        id.mid(0, 9);
+        qDebug() << id;
+    }
+
+    QUrl url("https://rus.hitmotop.com/song/" + id);
+    QNetworkRequest request(url);
+    QNetworkReply* reply = manager.get(request);
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply] () {
+        if(reply->error() == QNetworkReply::NoError) {
+            ArtistData result;
+
+            QString strReply = reply->readAll();
+            strReply = strReply.split("play-attr__link\" href=\"/artist/")[1];
+
+            result.id = strReply.split("\">")[0].toStdString();
+            result.name = strReply.split("\">")[1].split("</a>")[0].toStdString();
+            emit artistIdSearchBySongFinished(result);
+        }
+    });
 }
 
 QByteArray MusicApi::downloadSong(const QString &url)

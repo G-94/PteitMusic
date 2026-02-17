@@ -12,6 +12,7 @@
 #include <QKeyEvent>
 
 #include "scrollabletracklist.h"
+#include "artistslistwidget.h"
 #include "musicapi.h"
 #include "MusicGlobals.h"
 
@@ -30,6 +31,7 @@ private:
     QLineEdit* search_line;
     QPushButton* btnSearch;
 
+    ArtistsListWidget* artists_search_result;
     ScrollableTrackList* search_result;
     MusicApi api;
 
@@ -42,6 +44,12 @@ private slots:
     void setDeleteSelectedSong(int ID);
     void setPlaySelectedSong(int ID);
 
+    void setArtistList(const std::vector<ArtistData>& artist_data);
+    void onArtistTracklistReceived(const std::vector<Song>& tracklist, bool isForPlay);
+
+    void onFindArtistTracklist(const QString& artistId);
+    void onPlayArtistPlaylist(const QString& artistId);
+
 signals:
 
     void searchRequest(QString query);
@@ -50,6 +58,7 @@ signals:
     void downloadSelectedSong(std::vector<Song> tracklist, int ID);
     void deleteSelectedSong(std::vector<Song> tracklist, int ID);
     void playSelectedSong(std::vector<Song> tracklist, int ID);
+    void playArtistPlaylist(std::vector<Song> tracklist, int ID);
 
 };
 

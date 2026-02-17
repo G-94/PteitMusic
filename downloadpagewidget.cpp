@@ -227,30 +227,6 @@ void DownloadPageWidget::saveDownloadsSongsToJson()
     }
 }
 
-Song DownloadPageWidget::jsonToSong(const json &j)
-{
-    Song song;
-
-    if(j.is_object()) {
-        for(auto it = j.begin(); it != j.end(); ++it) {
-            song[it.key()] = it.value().get<std::string>();
-        }
-    }
-
-    return song;
-}
-
-json DownloadPageWidget::songToJson(const Song &song)
-{
-    json j;
-
-    for(const auto& [key, value] : song) {
-        j[key] = value;
-    }
-
-    return j;
-}
-
 std::string DownloadPageWidget::clearPathName(const std::string &path)
 {
     std::string r = path;

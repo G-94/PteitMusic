@@ -73,6 +73,8 @@ private slots:
     void onPlaybackStateChanged(QMediaPlayer::PlaybackState state);
     void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
 
+    void onArtistIdSearchBySong(const ArtistData& data);
+
 signals:
 
     void likeSongRequest(std::vector<Song> tracklist, int ID);

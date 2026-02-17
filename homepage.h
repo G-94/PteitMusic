@@ -57,6 +57,8 @@ private slots:
 
     void setPlaySelectedGenrePlaylist(std::vector<Song> tracklist, int ID, int genreId);
 
+    void setPlayPlaylistInRandomOrder(std::vector<Song> tracklist, int ID);
+
     void setLikeSelectedSong(std::vector<Song> tracklist, int ID);
 
     void setUnlikeSelectedSong(std::vector<Song> tracklist, int ID);

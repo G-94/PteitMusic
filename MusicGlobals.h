@@ -9,12 +9,7 @@
 using Song = std::map<std::string, std::string>;
 using json = nlohmann::json;
 
-namespace MusicGlobal {
-
-inline std::vector<Song> current_liked_tracklist;
-inline std::vector<Song> current_downloaded_tracklist;
-
-}
+///
 
 struct GenreData {
     std::string name;
@@ -45,13 +40,72 @@ inline bool compareByPlayCount(const GenreData& a, const GenreData& b) {
     return a.playCounter > b.playCounter;
 }
 
+///
+
 struct ArtistData {
     std::string name;
     std::string id;
+    int playCounter;
 
     ArtistData() : name{}, id{} {};
-    ArtistData(std::string name_, std::string id_) : name{std::move(name_)}, id{std::move(id)} {};
+    ArtistData(std::string name_, std::string id_) : name{std::move(name_)}, id{std::move(id_)}, playCounter{0} {};
+    ArtistData(std::string name_, std::string id_, int playCounter_) : name{std::move(name_)}, id{std::move(id_)}, playCounter{playCounter_} {};
+
+    json toJson() const {
+        return json {
+            {"name", name},
+            {"id", id},
+            {"playCounter", playCounter}
+        };
+    }
+
+    static ArtistData fromJson(const json& j) {
+        ArtistData data;
+        data.id = j.at("id");
+        data.name = j.at("name");
+        data.playCounter = j.at("playCounter");
+        return data;
+    }
 };
+
+///
+
+namespace MusicGlobal {
+
+inline std::vector<Song> current_liked_tracklist;
+inline std::vector<Song> current_downloaded_tracklist;
+inline std::vector<ArtistData> familiarArtists;
+inline std::vector<Song> familiarSongs;
+
+}
+
+///
+
+inline Song jsonToSong(const json &j)
+{
+    Song song;
+
+    if(j.is_object()) {
+        for(auto it = j.begin(); it != j.end(); ++it) {
+            song[it.key()] = it.value().get<std::string>();
+        }
+    }
+
+    return song;
+}
+
+inline json songToJson(const Song &song)
+{
+    json j;
+
+    for(const auto& [key, value] : song) {
+        j[key] = value;
+    }
+
+    return j;
+}
+
+///
 
 inline std::vector<GenreData> GENRES_DATA = {
     {"Нью-эйдж", 51, 0},
@@ -87,7 +141,7 @@ inline std::vector<GenreData> GENRES_DATA = {
     {"Техно", 45, 0},
     {"Экспериментальная", 55, 0},
     {"Инди", 18, 0},
-    {"R&B", 19, 0},
+    {"R&&B", 19, 0},
     {"Русский рэп", 75, 0},
     {"Рок-н-ролл", 61, 0},
     {"Вокал", 52, 0},

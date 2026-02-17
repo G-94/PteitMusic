@@ -17,8 +17,8 @@
 #include <QRandomGenerator>
 #include <fstream>
 
-#include "scrollableartistlist.h"
 #include "genrelistwidget.h"
+#include "artistslistwidget.h"
 #include "MusicGlobals.h"
 
 class PlaylistsHubPageWidget : public QWidget
@@ -37,7 +37,6 @@ private:
     QLabel* pageDescription;
 
     QLineEdit* artistsSearchLine;
-    ScrollableArtistList* artistListResult;
 
     GenreListWidget* genreList;
 
@@ -46,9 +45,17 @@ private:
     MusicApi api;
 
     QString JsonGenresPath = "Data/genres_rank.json";
+    QString JsonFamiliarSongsPath = "Data/familiar_songs.json";
+    QString JsonFamiliarArtistsPath = "Data/familiar_artists.json";
 
     void saveGenreInfoJson();
     void loadGenreInfoJson();
+
+    void saveFamiliarSongsJson();
+    void loadFamiliarSongsJson();
+
+    void saveFamiliarArtistsJson();
+    void loadFamiliarArtistsJson();
 
 private slots:
 
