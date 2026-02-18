@@ -67,9 +67,14 @@ private slots:
 
     void setDeleteSelectedSong(std::vector<Song> tracklist, int ID);
 
+    void onFindArtistTracklist(std::vector<Song> tracklist);
+
     void onLikesSongsUpdated();
 
     void onDownloadsSongsUpdated();
+
+    void onPlayedNewSong();
+
 
 signals:
 };

@@ -295,7 +295,7 @@ void PlayerWidget::onClickedbtnPlayNext()
         } else if (current_param == "random_order") {
             int randomIndex;
             do {
-                randomIndex = std::rand() % 480;
+                randomIndex = std::rand() % currentPlaylist.size();
             } while(randomIndex == current_song_index);
 
             SetSong(currentPlaylist, randomIndex, "random_order");
@@ -386,7 +386,7 @@ void PlayerWidget::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
             } else if (current_param == "random_order") {
                 int randomIndex;
                 do {
-                    randomIndex = std::rand() % 480;
+                    randomIndex = std::rand() % currentPlaylist.size();
                 } while(randomIndex == current_song_index);
 
                 SetSong(currentPlaylist, randomIndex, "random_order");
@@ -399,6 +399,7 @@ void PlayerWidget::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
 
 void PlayerWidget::onArtistIdSearchBySong(const ArtistData &data)
 {
+    qDebug() << "dsfsdfsdfsdfdfs";
     for(auto& item : MusicGlobal::familiarArtists) {
         if(data.id == item.id) {
             ++item.playCounter;
@@ -406,4 +407,5 @@ void PlayerWidget::onArtistIdSearchBySong(const ArtistData &data)
         }
     }
     MusicGlobal::familiarArtists.push_back(data);
+    emit songPlayed();
 }

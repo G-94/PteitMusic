@@ -93,11 +93,16 @@ homepage::homepage(QWidget *parent)
     QObject::connect(pageDownloads, &DownloadPageWidget::setUnlikedSong, this, &homepage::setUnlikeSelectedSong);
 
     QObject::connect(pagePlaylists, &PlaylistsHubPageWidget::playGenrePlaylist, this, &homepage::setPlaySelectedGenrePlaylist);
+    QObject::connect(pagePlaylists, &PlaylistsHubPageWidget::playFamiliarArtistPlaylist, this, &homepage::setPlayPlaylistInRandomOrder);
+    QObject::connect(pagePlaylists, &PlaylistsHubPageWidget::playFamiliarSongPlaylist, this, &homepage::setPlayPlaylistInRandomOrder);
+    QObject::connect(pagePlaylists, &PlaylistsHubPageWidget::findFamiliarArtistTracklits, this, &homepage::onFindArtistTracklist);
 
     QObject::connect(player, &PlayerWidget::likeSongRequest, this, &homepage::setLikeSelectedSong);
     QObject::connect(player, &PlayerWidget::unlikeSongRequest, this, &homepage::setUnlikeSelectedSong);
     QObject::connect(player, &PlayerWidget::downloadSongRequest, this, &homepage::setDownloadSelectedSong);
     QObject::connect(player, &PlayerWidget::deleteSongRequest, this, &homepage::setDeleteSelectedSong);
+    QObject::connect(player, &PlayerWidget::songPlayed, this, &homepage::onPlayedNewSong);
+
 }
 
 void homepage::setPlaySelectedSong(std::vector<Song> tracklist, int ID)
@@ -152,6 +157,12 @@ void homepage::setDeleteSelectedSong(std::vector<Song> tracklist, int ID)
     pageDownloads->removeSongFromDownloads(currentSong.at("id"));
 }
 
+void homepage::onFindArtistTracklist(std::vector<Song> tracklist)
+{
+    pageSearch->setTracklist(tracklist);
+    pages->setCurrentWidget(pageSearch);
+}
+
 void homepage::setUnlikeSelectedSong(std::vector<Song> tracklist, int ID)
 {
     if (tracklist.empty() || ID < 0) return;
@@ -173,6 +184,11 @@ void homepage::onDownloadsSongsUpdated()
     pageSearch->updateTracklist();
     pageLikes->updateTracklist();
     player->checkDownloads();
+}
+
+void homepage::onPlayedNewSong()
+{
+    pagePlaylists->updateListWithNewData();
 }
 
 

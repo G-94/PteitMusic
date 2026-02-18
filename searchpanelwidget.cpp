@@ -119,3 +119,8 @@ void SearchPanelWidget::updateTracklist()
 {
     search_result->updateTracklist(search_result->getTracklist());
 }
+
+void SearchPanelWidget::setTracklist(const std::vector<Song> &tracklist)
+{
+    search_result->setTracklist(tracklist);
+}

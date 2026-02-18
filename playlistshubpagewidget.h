@@ -30,17 +30,21 @@ public:
 
     void incrementGenreCounter(int genreId);
 
+    void updateListWithNewData();
+
 private:
 
     QVBoxLayout* main_layout;
 
     QLabel* pageDescription;
 
-    QLineEdit* artistsSearchLine;
-
     GenreListWidget* genreList;
-
     std::vector<GenreData> genresData;
+
+    ArtistsListWidget* familiarArtistsList;
+
+    QHBoxLayout* volna_btns_layout;
+    QPushButton* btnPlayFamiliarSongs;
 
     MusicApi api;
 
@@ -60,10 +64,17 @@ private:
 private slots:
 
     void onGenreSelected(int id);
+    void onPlayFamiliarSongs();
+    void onPlayFamiliarArtist(const QString& artistId);
+    void onFindFamiliarArtistTracklits(const QString& artistId);
+    void onFamiliarArtistSignalRecieved(std::vector<Song> tracklist, bool isForPlay);
 
 signals:
 
     void playGenrePlaylist(std::vector<Song> tracklist, int ID, int genreId);
+    void playFamiliarSongPlaylist(std::vector<Song> tracklist, int ID);
+    void playFamiliarArtistPlaylist(std::vector<Song> tracklist, int ID);
+    void findFamiliarArtistTracklits(std::vector<Song> tracklist);
 
 };
 

@@ -103,7 +103,7 @@ void MusicApi::getTracklistByArtistId(const QString &id, bool isForPlay)
 void MusicApi::getArtistDataBySongId(QString id)
 {
     if(id.startsWith("t")) {
-        id.mid(0, 9);
+        id = id.mid(0, 9);
         qDebug() << id;
     }
 

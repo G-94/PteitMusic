@@ -36,7 +36,7 @@ struct GenreData {
     }
 };
 
-inline bool compareByPlayCount(const GenreData& a, const GenreData& b) {
+inline bool compareGenresByPlayCount(const GenreData& a, const GenreData& b) {
     return a.playCounter > b.playCounter;
 }
 
@@ -67,6 +67,10 @@ struct ArtistData {
         return data;
     }
 };
+
+inline bool compareArtistsByPlayCount(const ArtistData& a, const ArtistData& b) {
+    return a.playCounter > b.playCounter;
+}
 
 ///
 

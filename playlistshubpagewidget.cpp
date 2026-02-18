@@ -44,22 +44,40 @@ PlaylistsHubPageWidget::PlaylistsHubPageWidget(QWidget *parent)
     genreList = new GenreListWidget();
 
     loadGenreInfoJson();
+    loadFamiliarArtistsJson();
+    loadFamiliarSongsJson();
 
     if(genresData.empty()) {
         genresData = GENRES_DATA;
         saveGenreInfoJson();
     }
 
-    qDebug() << "Setting genres, count:" << genresData.size();
     genreList->setGenres(genresData);
     main_layout->addWidget(genreList);
 
+    familiarArtistsList = new ArtistsListWidget();
+    familiarArtistsList->setArtists(MusicGlobal::familiarArtists);
+    main_layout->addWidget(familiarArtistsList);
+
+    volna_btns_layout = new QHBoxLayout();
+    btnPlayFamiliarSongs = new QPushButton("play familiar songs");
+    volna_btns_layout->addWidget(btnPlayFamiliarSongs);
+    main_layout->addLayout(volna_btns_layout);
+
     connect(genreList, &GenreListWidget::genreSelected, this, &PlaylistsHubPageWidget::onGenreSelected);
+    connect(btnPlayFamiliarSongs, &QPushButton::clicked, this, &PlaylistsHubPageWidget::onPlayFamiliarSongs);
+
+    connect(familiarArtistsList, &ArtistsListWidget::playArtistPlaylist, this, &PlaylistsHubPageWidget::onPlayFamiliarArtist);
+    connect(familiarArtistsList, &ArtistsListWidget::findArtistTracks, this, &PlaylistsHubPageWidget::onFindFamiliarArtistTracklits);
+
+    connect(&api, &MusicApi::artistTracklistSearchFinished, this, &PlaylistsHubPageWidget::onFamiliarArtistSignalRecieved);
 }
 
 PlaylistsHubPageWidget::~PlaylistsHubPageWidget()
 {
     saveGenreInfoJson();
+    saveFamiliarArtistsJson();
+    saveFamiliarSongsJson();
 }
 
 void PlaylistsHubPageWidget::incrementGenreCounter(int genreId)
@@ -70,6 +88,17 @@ void PlaylistsHubPageWidget::incrementGenreCounter(int genreId)
             break;
         }
     }
+}
+
+void PlaylistsHubPageWidget::updateListWithNewData()
+{
+    familiarArtistsList->setArtists(MusicGlobal::familiarArtists);
+
+    disconnect(familiarArtistsList, &ArtistsListWidget::playArtistPlaylist, this, &PlaylistsHubPageWidget::onPlayFamiliarArtist);
+    disconnect(familiarArtistsList, &ArtistsListWidget::findArtistTracks, this, &PlaylistsHubPageWidget::onFindFamiliarArtistTracklits);
+
+    connect(familiarArtistsList, &ArtistsListWidget::playArtistPlaylist, this, &PlaylistsHubPageWidget::onPlayFamiliarArtist);
+    connect(familiarArtistsList, &ArtistsListWidget::findArtistTracks, this, &PlaylistsHubPageWidget::onFindFamiliarArtistTracklits);
 }
 
 void PlaylistsHubPageWidget::saveGenreInfoJson()
@@ -123,8 +152,7 @@ void PlaylistsHubPageWidget::loadGenreInfoJson()
             }
         }
 
-        std::sort(genresData.begin(), genresData.end(), compareByPlayCount);
-
+        std::sort(genresData.begin(), genresData.end(), compareGenresByPlayCount);
     } catch (json::exception& e) {
         qDebug() << "catch json exc while loadGenreInfo" << e.what();
     } catch (std::exception& e) {
@@ -177,21 +205,68 @@ void PlaylistsHubPageWidget::loadFamiliarSongsJson()
         for(const auto& item : j) {
             if(item.is_object()) {
                 MusicGlobal::familiarSongs.push_back(jsonToSong(item));
-
             }
         }
+    } catch (json::exception& e) {
+        qDebug() << "catch json exc while loadFamiliarSongs" << e.what();
+    } catch (std::exception& e) {
+        qDebug() << "catch std::exception while loadFamiliarSongs" << e.what();
     }
-
 }
 
 void PlaylistsHubPageWidget::saveFamiliarArtistsJson()
 {
+    json j = json::array();
+
+    try {
+        for(const auto& item : MusicGlobal::familiarArtists) {
+            j.push_back(item.toJson());
+        }
+
+        std::string jsonStr = j.dump(4);
+
+        QFile file(JsonFamiliarArtistsPath);
+        if(!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+            qDebug() << "error on openning json in save Familiar songs";
+            return;
+        }
+
+        file.write(jsonStr.c_str(), jsonStr.size());
+        file.close();
+    } catch (json::exception& e) {
+        qDebug() << "catch json exc while saveFamiliarArtists" << e.what();
+    } catch (std::exception& e) {
+        qDebug() << "catch std::exception while saveFamiliarArtists" << e.what();
+    }
 
 }
 
 void PlaylistsHubPageWidget::loadFamiliarArtistsJson()
 {
+    QFile file(JsonFamiliarArtistsPath);
+    if(!file.open(QIODevice::ReadOnly)) {
+        qDebug() << "error on openning json in load Familiar songs";
+        return;
+    }
 
+    QByteArray data = file.readAll();
+    file.close();
+
+    try {
+        json j = json::parse(data.toStdString());
+
+        for(const auto& item : j) {
+            if(item.is_object()) {
+                MusicGlobal::familiarArtists.push_back(ArtistData::fromJson(item));
+            }
+        }
+
+        std::sort(MusicGlobal::familiarArtists.begin(), MusicGlobal::familiarArtists.end(), compareArtistsByPlayCount);
+    } catch (json::exception& e) {
+        qDebug() << "catch json exc while loadFamiliarArtists" << e.what();
+    } catch (std::exception& e) {
+        qDebug() << "catch std::exception while loadFamiliarArtists" << e.what();
+    }
 }
 
 void PlaylistsHubPageWidget::onGenreSelected(int id)
@@ -209,4 +284,32 @@ void PlaylistsHubPageWidget::onGenreSelected(int id)
 
     qDebug() << "Searching genre:" << id;
     api.searchByGenre(QString::number(id));
+}
+
+void PlaylistsHubPageWidget::onPlayFamiliarSongs()
+{
+    if (MusicGlobal::familiarSongs.empty()) return;
+
+    int randomId = rand() % MusicGlobal::familiarSongs.size();
+    emit playFamiliarSongPlaylist(MusicGlobal::familiarSongs, randomId);
+}
+
+void PlaylistsHubPageWidget::onPlayFamiliarArtist(const QString &artistId)
+{
+    api.getTracklistByArtistId(artistId, true);
+}
+
+void PlaylistsHubPageWidget::onFindFamiliarArtistTracklits(const QString &artistId)
+{
+    api.getTracklistByArtistId(artistId, false);
+}
+
+void PlaylistsHubPageWidget::onFamiliarArtistSignalRecieved(std::vector<Song> tracklist, bool isForPlay)
+{
+    if(isForPlay) {
+        int randomId = rand() & tracklist.size();
+        emit playFamiliarArtistPlaylist(tracklist, randomId);
+    } else {
+        emit findFamiliarArtistTracklits(tracklist);
+    }
 }

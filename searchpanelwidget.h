@@ -23,6 +23,7 @@ public:
     explicit SearchPanelWidget(QWidget *parent = nullptr);
 
     void updateTracklist();
+    void setTracklist(const std::vector<Song>& tracklist);
 
 private:
 

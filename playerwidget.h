@@ -72,7 +72,6 @@ private slots:
     void onClickedbtnVolume(bool Muted);
     void onPlaybackStateChanged(QMediaPlayer::PlaybackState state);
     void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
-
     void onArtistIdSearchBySong(const ArtistData& data);
 
 signals:
@@ -81,6 +80,7 @@ signals:
     void unlikeSongRequest(std::vector<Song> tracklist, int ID);
     void downloadSongRequest(std::vector<Song> tracklist, int ID);
     void deleteSongRequest(std::vector<Song> tracklist, int ID);
+    void songPlayed();
 };
 
 #endif // PLAYERWIDGET_H
