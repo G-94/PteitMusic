@@ -59,13 +59,23 @@ PlaylistsHubPageWidget::PlaylistsHubPageWidget(QWidget *parent)
     familiarArtistsList->setArtists(MusicGlobal::familiarArtists);
     main_layout->addWidget(familiarArtistsList);
 
-    volna_btns_layout = new QHBoxLayout();
+    streams_layout = new QHBoxLayout();
+
     btnPlayFamiliarSongs = new QPushButton("play familiar songs");
-    volna_btns_layout->addWidget(btnPlayFamiliarSongs);
-    main_layout->addLayout(volna_btns_layout);
+    streams_layout->addWidget(btnPlayFamiliarSongs);
+
+    btnPlayLikedSongs = new QPushButton("Play liked songs");
+    streams_layout->addWidget(btnPlayLikedSongs);
+
+    btnPlayDownloadedSongs = new QPushButton("Play downloaded songs");
+    streams_layout->addWidget(btnPlayDownloadedSongs);
+
+    main_layout->addLayout(streams_layout);
 
     connect(genreList, &GenreListWidget::genreSelected, this, &PlaylistsHubPageWidget::onGenreSelected);
     connect(btnPlayFamiliarSongs, &QPushButton::clicked, this, &PlaylistsHubPageWidget::onPlayFamiliarSongs);
+    connect(btnPlayLikedSongs, &QPushButton::clicked, this, &PlaylistsHubPageWidget::onPlayLikedSongs);
+    connect(btnPlayDownloadedSongs, &QPushButton::clicked, this, &PlaylistsHubPageWidget::onPlayDownloadedSongs);
 
     connect(familiarArtistsList, &ArtistsListWidget::playArtistPlaylist, this, &PlaylistsHubPageWidget::onPlayFamiliarArtist);
     connect(familiarArtistsList, &ArtistsListWidget::findArtistTracks, this, &PlaylistsHubPageWidget::onFindFamiliarArtistTracklits);
@@ -74,7 +84,7 @@ PlaylistsHubPageWidget::PlaylistsHubPageWidget(QWidget *parent)
 }
 
 PlaylistsHubPageWidget::~PlaylistsHubPageWidget()
-{
+{  
     saveGenreInfoJson();
     saveFamiliarArtistsJson();
     saveFamiliarSongsJson();
@@ -92,13 +102,11 @@ void PlaylistsHubPageWidget::incrementGenreCounter(int genreId)
 
 void PlaylistsHubPageWidget::updateListWithNewData()
 {
+    std::sort(MusicGlobal::familiarArtists.begin(),
+              MusicGlobal::familiarArtists.end(),
+              compareArtistsByPlayCount);
+
     familiarArtistsList->setArtists(MusicGlobal::familiarArtists);
-
-    disconnect(familiarArtistsList, &ArtistsListWidget::playArtistPlaylist, this, &PlaylistsHubPageWidget::onPlayFamiliarArtist);
-    disconnect(familiarArtistsList, &ArtistsListWidget::findArtistTracks, this, &PlaylistsHubPageWidget::onFindFamiliarArtistTracklits);
-
-    connect(familiarArtistsList, &ArtistsListWidget::playArtistPlaylist, this, &PlaylistsHubPageWidget::onPlayFamiliarArtist);
-    connect(familiarArtistsList, &ArtistsListWidget::findArtistTracks, this, &PlaylistsHubPageWidget::onFindFamiliarArtistTracklits);
 }
 
 void PlaylistsHubPageWidget::saveGenreInfoJson()
@@ -292,6 +300,18 @@ void PlaylistsHubPageWidget::onPlayFamiliarSongs()
 
     int randomId = rand() % MusicGlobal::familiarSongs.size();
     emit playFamiliarSongPlaylist(MusicGlobal::familiarSongs, randomId);
+}
+
+void PlaylistsHubPageWidget::onPlayLikedSongs()
+{
+    int randomInt = rand() % MusicGlobal::current_liked_tracklist.size();
+    emit playLikedSongPlaylist(MusicGlobal::current_liked_tracklist, randomInt);
+}
+
+void PlaylistsHubPageWidget::onPlayDownloadedSongs()
+{
+    int randomInt = rand() % MusicGlobal::current_downloaded_tracklist.size();
+    emit playLikedSongPlaylist(MusicGlobal::current_downloaded_tracklist, randomInt);
 }
 
 void PlaylistsHubPageWidget::onPlayFamiliarArtist(const QString &artistId)

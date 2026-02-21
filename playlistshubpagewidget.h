@@ -43,8 +43,10 @@ private:
 
     ArtistsListWidget* familiarArtistsList;
 
-    QHBoxLayout* volna_btns_layout;
+    QHBoxLayout* streams_layout;
     QPushButton* btnPlayFamiliarSongs;
+    QPushButton* btnPlayLikedSongs;
+    QPushButton* btnPlayDownloadedSongs;
 
     MusicApi api;
 
@@ -65,6 +67,8 @@ private slots:
 
     void onGenreSelected(int id);
     void onPlayFamiliarSongs();
+    void onPlayLikedSongs();
+    void onPlayDownloadedSongs();
     void onPlayFamiliarArtist(const QString& artistId);
     void onFindFamiliarArtistTracklits(const QString& artistId);
     void onFamiliarArtistSignalRecieved(std::vector<Song> tracklist, bool isForPlay);
@@ -73,6 +77,8 @@ signals:
 
     void playGenrePlaylist(std::vector<Song> tracklist, int ID, int genreId);
     void playFamiliarSongPlaylist(std::vector<Song> tracklist, int ID);
+    void playLikedSongPlaylist(std::vector<Song> tracklist, int ID);
+    void playDownloadedSongPlaylist(std::vector<Song> tracklist, int ID);
     void playFamiliarArtistPlaylist(std::vector<Song> tracklist, int ID);
     void findFamiliarArtistTracklits(std::vector<Song> tracklist);
 

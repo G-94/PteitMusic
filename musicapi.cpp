@@ -100,11 +100,12 @@ void MusicApi::getTracklistByArtistId(const QString &id, bool isForPlay)
     }
 }
 
+#include <fstream>
+
 void MusicApi::getArtistDataBySongId(QString id)
 {
     if(id.startsWith("t")) {
-        id = id.mid(0, 9);
-        qDebug() << id;
+        id = id.mid(9);
     }
 
     QUrl url("https://rus.hitmotop.com/song/" + id);

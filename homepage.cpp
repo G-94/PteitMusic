@@ -94,7 +94,9 @@ homepage::homepage(QWidget *parent)
 
     QObject::connect(pagePlaylists, &PlaylistsHubPageWidget::playGenrePlaylist, this, &homepage::setPlaySelectedGenrePlaylist);
     QObject::connect(pagePlaylists, &PlaylistsHubPageWidget::playFamiliarArtistPlaylist, this, &homepage::setPlayPlaylistInRandomOrder);
+    QObject::connect(pagePlaylists, &PlaylistsHubPageWidget::playLikedSongPlaylist, this, &homepage::setPlayPlaylistInRandomOrder);
     QObject::connect(pagePlaylists, &PlaylistsHubPageWidget::playFamiliarSongPlaylist, this, &homepage::setPlayPlaylistInRandomOrder);
+    QObject::connect(pagePlaylists, &PlaylistsHubPageWidget::playDownloadedSongPlaylist, this, &homepage::setPlaySongPlaylistFromSourceInRandomOrder);
     QObject::connect(pagePlaylists, &PlaylistsHubPageWidget::findFamiliarArtistTracklits, this, &homepage::onFindArtistTracklist);
 
     QObject::connect(player, &PlayerWidget::likeSongRequest, this, &homepage::setLikeSelectedSong);
@@ -108,26 +110,27 @@ homepage::homepage(QWidget *parent)
 void homepage::setPlaySelectedSong(std::vector<Song> tracklist, int ID)
 {
     player->SetSong(tracklist, ID);
-    qDebug() << "onplaySelected";
 }
 
 void homepage::setPlaySelectedSongFromSource(std::vector<Song> tracklist, int ID)
 {
     player->SetSong(tracklist, ID, "from_source");
-    qDebug() << "onplayDownloaded";
+}
+
+void homepage::setPlaySongPlaylistFromSourceInRandomOrder(std::vector<Song> tracklist, int ID)
+{
+    player->SetSong(tracklist, ID, "from_source_random_order");
 }
 
 void homepage::setPlaySelectedGenrePlaylist(std::vector<Song> tracklist, int ID, int genreId)
 {
     pagePlaylists->incrementGenreCounter(genreId);
     player->SetSong(tracklist, ID, "random_order");
-    qDebug() << "onplaygenre";
 }
 
 void homepage::setPlayPlaylistInRandomOrder(std::vector<Song> tracklist, int ID)
 {
     player->SetSong(tracklist, ID, "random_order");
-    qDebug() << "onplayrandom";
 }
 
 void homepage::setLikeSelectedSong(std::vector<Song> tracklist, int ID)
@@ -175,6 +178,7 @@ void homepage::setUnlikeSelectedSong(std::vector<Song> tracklist, int ID)
 void homepage::onLikesSongsUpdated()
 {
     pageSearch->updateTracklist();
+    pageLikes->updateTracklist();
     pageDownloads->updateTracklist();
     player->checkLikes();
 }
@@ -182,6 +186,7 @@ void homepage::onLikesSongsUpdated()
 void homepage::onDownloadsSongsUpdated()
 {
     pageSearch->updateTracklist();
+    pageDownloads->updateTracklist();
     pageLikes->updateTracklist();
     player->checkDownloads();
 }

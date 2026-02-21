@@ -51,8 +51,6 @@ DownloadPageWidget::DownloadPageWidget(QWidget *parent)
     });
 
     loadDownloadsSongs();
-
-    qDebug() << "download widget created";
 }
 
 void DownloadPageWidget::addSongToDownloads(const Song &song)

@@ -139,7 +139,7 @@ void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_s
 
         api.getArtistDataBySongId(QString::fromStdString(song.at("id")));
 
-        if(current_param == "from_source") {
+        if(current_param == "from_source" || current_param == "from_source_random_order") {
             std::string song_title = song["title"] + " - " + song["artist"];
             track_title->setText(QString::fromStdString(song_title));
 
@@ -299,6 +299,13 @@ void PlayerWidget::onClickedbtnPlayNext()
             } while(randomIndex == current_song_index);
 
             SetSong(currentPlaylist, randomIndex, "random_order");
+        } else if (current_param == "from_source_random_order") {
+            int randomIndex;
+            do {
+                randomIndex = std::rand() % currentPlaylist.size();
+            } while(randomIndex == current_song_index);
+
+            SetSong(currentPlaylist, randomIndex, "from_source_random_order");
         } else {
             SetSong(currentPlaylist, nextSongIndex);
         }
@@ -317,6 +324,8 @@ void PlayerWidget::onClickedbtnPlayPrev()
     if (nextSongIndex >= 0) {
         if(current_param == "from_source") {
             SetSong(currentPlaylist, nextSongIndex, "from_source");
+        } else if (current_param == "from_source_random_order") {
+            SetSong(currentPlaylist, nextSongIndex, "from_source_random_order");
         } else {
             SetSong(currentPlaylist, nextSongIndex);
         }
@@ -390,6 +399,13 @@ void PlayerWidget::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
                 } while(randomIndex == current_song_index);
 
                 SetSong(currentPlaylist, randomIndex, "random_order");
+            } else if (current_param == "from_source_random_order") {
+                int randomIndex;
+                do {
+                    randomIndex = std::rand() % currentPlaylist.size();
+                } while(randomIndex == current_song_index);
+
+                SetSong(currentPlaylist, randomIndex, "from_source_random_order");
             } else {
                 this->SetSong(currentPlaylist, current_song_index + 1);
             }
@@ -399,13 +415,18 @@ void PlayerWidget::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
 
 void PlayerWidget::onArtistIdSearchBySong(const ArtistData &data)
 {
-    qDebug() << "dsfsdfsdfsdfdfs";
+    bool found = false;
     for(auto& item : MusicGlobal::familiarArtists) {
         if(data.id == item.id) {
             ++item.playCounter;
-            return;
+            found = true;
+            break;
         }
     }
-    MusicGlobal::familiarArtists.push_back(data);
+
+    if(!found) {
+        MusicGlobal::familiarArtists.push_back(data);
+    }
+
     emit songPlayed();
 }

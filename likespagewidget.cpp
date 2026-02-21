@@ -20,8 +20,6 @@ LikesPageWidget::LikesPageWidget(QWidget *parent)
     tracklist_widget = new ScrollableTrackList();
     main_layout->addWidget(tracklist_widget);
 
-    loadLikesSongs();
-
     QObject::connect(tracklist_widget, &ScrollableTrackList::setSongRequset, [this] (int songID) {
         emit setPlaySong(MusicGlobal::current_liked_tracklist, songID);
     });
@@ -38,6 +36,8 @@ LikesPageWidget::LikesPageWidget(QWidget *parent)
         Song song = tracklist_widget->getTracklist()[songID];
         removeSongFromLikes(song.at("id"));
     });
+
+    loadLikesSongs();
 }
 
 void LikesPageWidget::addSongToLikes(const Song &song)

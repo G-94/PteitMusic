@@ -36,6 +36,7 @@ qt_add_executable(appPteitMusic
     genrelistwidget.h genrelistwidget.cpp
     artistslistwidget.h artistslistwidget.cpp
     artistslistitem.h artistslistitem.cpp
+    styles.h
 
 )
 
