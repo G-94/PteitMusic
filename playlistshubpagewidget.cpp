@@ -297,19 +297,20 @@ void PlaylistsHubPageWidget::onGenreSelected(int id)
 void PlaylistsHubPageWidget::onPlayFamiliarSongs()
 {
     if (MusicGlobal::familiarSongs.empty()) return;
-
     int randomId = rand() % MusicGlobal::familiarSongs.size();
     emit playFamiliarSongPlaylist(MusicGlobal::familiarSongs, randomId);
 }
 
 void PlaylistsHubPageWidget::onPlayLikedSongs()
 {
+    if(MusicGlobal::current_liked_tracklist.empty()) return;
     int randomInt = rand() % MusicGlobal::current_liked_tracklist.size();
     emit playLikedSongPlaylist(MusicGlobal::current_liked_tracklist, randomInt);
 }
 
 void PlaylistsHubPageWidget::onPlayDownloadedSongs()
 {
+    if(MusicGlobal::current_downloaded_tracklist.empty()) return;
     int randomInt = rand() % MusicGlobal::current_downloaded_tracklist.size();
     emit playLikedSongPlaylist(MusicGlobal::current_downloaded_tracklist, randomInt);
 }
@@ -333,3 +334,4 @@ void PlaylistsHubPageWidget::onFamiliarArtistSignalRecieved(std::vector<Song> tr
         emit findFamiliarArtistTracklits(tracklist);
     }
 }
+
