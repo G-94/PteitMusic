@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
     MusicGlobal::current_downloaded_tracklist = {};
 
     homepage pl;
-    pl.setFixedSize(1280, 720);
+    //pl.setFixedSize(1280, 720);
 
     pl.show();
 

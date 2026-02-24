@@ -9,10 +9,13 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QList>
+#include <QEvent>
+#include <QPainter>
 #include <QStackedWidget>
 #include <QLabel>
 
 #include "MusicGlobals.h"
+#include "styles.h"
 
 using Song = std::map<std::string, std::string>;
 
@@ -33,7 +36,16 @@ private:
     QPushButton* btnDownload;
     QPushButton* btnPlay;
 
+    QFrame *container;
+    bool isHovered = false;
+
     int songID;
+
+protected:
+
+    void enterEvent(QEnterEvent *event) override;
+    void leaveEvent(QEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
 
 private slots:
 

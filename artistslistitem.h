@@ -6,8 +6,11 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QEvent>
+#include <QFrame>
 
 #include "MusicGlobals.h"
+#include "styles.h"
 
 class ArtistsListItem : public QWidget
 {
@@ -23,8 +26,16 @@ private:
     QPushButton* btnArtistFindTracks;
     QPushButton* btnArtistPlayPlaylist;
 
+    QFrame* container;
+    bool isHovered = false;
+
     QLabel* artistNameLabel;
     ArtistData data;
+
+protected:
+
+    void enterEvent(QEnterEvent *event) override;
+    void leaveEvent(QEvent *event) override;
 
 signals:
 

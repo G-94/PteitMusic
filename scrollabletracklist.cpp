@@ -3,22 +3,32 @@
 ScrollableTrackList::ScrollableTrackList(const std::vector<Song>& tracklist_) : current_tracklist{tracklist_}
 {
     QVBoxLayout* main_layout = new QVBoxLayout(this);
+    main_layout->setContentsMargins(0, 0, 0, 0);
+
+    QPalette pal = this->palette();
+    pal.setColor(QPalette::Window, QColor(45, 45, 45));
+    this->setPalette(pal);
+    this->setAutoFillBackground(true);
+
+    this->setStyleSheet(Style::getScrollableTracklistStyle());
 
     scrollArea = new QScrollArea();
     scrollArea->setWidgetResizable(true);
 
     list_layout = new QVBoxLayout();
+    list_layout->setSpacing(0);
+    list_layout->setContentsMargins(0, 0, 0, 0);
+
     listWidget = new QWidget();
+    listWidget->setObjectName("scrollAreaWidgetContents");
 
     listWidget->setLayout(list_layout);
-
     scrollArea->setWidget(listWidget);
     main_layout->addWidget(scrollArea);
 
     if(!tracklist_.empty()) {
         setTracklist(tracklist_);
     }
-
 }
 
 void ScrollableTrackList::setTracklist(const std::vector<Song>& tracklist_)

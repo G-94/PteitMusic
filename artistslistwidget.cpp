@@ -4,6 +4,11 @@ ArtistsListWidget::ArtistsListWidget(QWidget *parent)
 {
     main_layout = new QVBoxLayout(this);
 
+    QPalette pal = this->palette();
+    pal.setColor(QPalette::Window, QColor(45, 45, 45));
+    this->setPalette(pal);
+    this->setAutoFillBackground(true);
+
     scrollContent = new QWidget();
     scroll_layout = new QHBoxLayout(scrollContent);
 
@@ -12,8 +17,10 @@ ArtistsListWidget::ArtistsListWidget(QWidget *parent)
     scrollArea->setWidget(scrollContent);
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
+    scrollArea->setStyleSheet(Style::getArtistListWidgetStyle());
+
     main_layout->addWidget(scrollArea);
-    setFixedHeight(100);
+    setFixedHeight(150);
 }
 
 void ArtistsListWidget::setArtists(const std::vector<ArtistData> &artistList)

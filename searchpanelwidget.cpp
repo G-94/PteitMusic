@@ -15,6 +15,7 @@ SearchPanelWidget::SearchPanelWidget(QWidget *parent)
     main_layout->addLayout(search_layout);
 
     artists_search_result = new ArtistsListWidget();
+    artists_search_result->setFixedHeight(140);
     artists_search_result->setVisible(false);
     main_layout->addWidget(artists_search_result);
 

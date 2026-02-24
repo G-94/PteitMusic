@@ -9,6 +9,7 @@
 
 #include "songtracklistitem.h"
 #include "MusicGlobals.h"
+#include "styles.h"
 
 using Song = std::map<std::string, std::string>;
 

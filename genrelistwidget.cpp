@@ -12,9 +12,10 @@ GenreListWidget::GenreListWidget(QWidget *parent)
     scrollArea = new QScrollArea();
     scrollArea->setWidgetResizable(true);
     scrollArea->setWidget(scrollContent);
+    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     main_layout->addWidget(scrollArea);
-    setFixedHeight(70);
+    setFixedHeight(150);
 }
 
 void GenreListWidget::setGenres(const std::vector<GenreData> &buttons_data)

@@ -47,7 +47,7 @@ PlayerWidget::PlayerWidget(QWidget *parent)
     main_layout->addLayout(buttons_layout);
 
     this->setLayout(main_layout);
-    this->setFixedSize(1100, 130);
+    //this->setFixedSize(1100, 130);
 
     player = new QMediaPlayer();
     aOutput = new QAudioOutput();

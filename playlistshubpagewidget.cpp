@@ -38,7 +38,7 @@ PlaylistsHubPageWidget::PlaylistsHubPageWidget(QWidget *parent)
 
     main_layout = new QVBoxLayout(this);
 
-    pageDescription = new QLabel("this is yout volna page");
+    pageDescription = new QLabel("this is yout stream page");
     main_layout->addWidget(pageDescription);
 
     genreList = new GenreListWidget();
@@ -334,4 +334,3 @@ void PlaylistsHubPageWidget::onFamiliarArtistSignalRecieved(std::vector<Song> tr
         emit findFamiliarArtistTracklits(tracklist);
     }
 }
-
