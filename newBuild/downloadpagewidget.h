@@ -33,7 +33,6 @@ private:
     LikesService* likesService;
     DownloadsService* downloadsService;
 
-
 signals:
 
     void setPlaySong(std::vector<Song> tracklist, int ID);
@@ -43,3 +42,4 @@ signals:
 };
 
 #endif // DOWNLOADPAGEWIDGET_H
+
