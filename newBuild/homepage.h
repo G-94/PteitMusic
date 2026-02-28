@@ -27,6 +27,7 @@
 #include "playlistsservice.h"
 #include "historyservice.h"
 #include "searchservice.h"
+#include "playerservice.h"
 
 using Song = std::map<std::string, std::string>;
 
@@ -50,6 +51,7 @@ private:
     DownloadsService downloadsService;
     PlaylistsService playlistsService;
     SearchService searchService;
+    PlayerService playerService;
 
     QStackedWidget* pages;
     SearchPanelWidget* pageSearch;

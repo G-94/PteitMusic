@@ -21,11 +21,19 @@
 
 #include "MusicGlobals.h"
 
+#include "likesservice.h"
+#include "downloadsservice.h"
+#include "playlistsservice.h"
+#include "historyservice.h"
+#include "playerservice.h"
+
 class PlayerWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit PlayerWidget(QWidget *parent = nullptr);
+    explicit PlayerWidget(LikesService* likesService_, DownloadsService* downloadsService_, PlayerService* playerService_,
+                            HistoryService* historyService_, PlaylistsService* playlistsService_
+    );
 
     void SetSong(const std::vector<Song>& playlist, int current_song_index, const QString& param = "");
 
@@ -55,7 +63,11 @@ private:
     std::vector<Song> currentPlaylist;
     int current_song_index = -1;
 
-    MusicApi api;
+    HistoryService* historyService;
+    LikesService* likesService;
+    DownloadsService* downloadsService;
+    PlaylistsService* playlistsService;
+    PlayerService* playerService;
 
     void checkNextAndPrev();
 
@@ -76,10 +88,6 @@ private slots:
 
 signals:
 
-    void likeSongRequest(std::vector<Song> tracklist, int ID);
-    void unlikeSongRequest(std::vector<Song> tracklist, int ID);
-    void downloadSongRequest(std::vector<Song> tracklist, int ID);
-    void deleteSongRequest(std::vector<Song> tracklist, int ID);
     void songPlayed();
 };
 

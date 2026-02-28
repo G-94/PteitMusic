@@ -214,4 +214,3 @@ std::vector<Song> MusicApi::parseHtml(const QByteArray &data)
     return result;
 
 }
-

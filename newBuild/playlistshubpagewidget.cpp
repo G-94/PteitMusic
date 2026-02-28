@@ -1,41 +1,9 @@
 #include "playlistshubpagewidget.h"
 #include "MusicGlobals.h"
 
-PlaylistsHubPageWidget::PlaylistsHubPageWidget(QWidget *parent)
-    : QWidget{parent}
+PlaylistsHubPageWidget::PlaylistsHubPageWidget(PlaylistsService* playlistsService_, HistoryService* historyService_, SearchService* searchService_)
+    : playlistsService{playlistsService_},  historyService{historyService_}, searchService{searchService_}
 {
-    QDir dir("Data");
-    if(!dir.exists()) {
-        dir.mkdir(".");
-    }
-
-    QFile genresJson(JsonGenresPath);
-    if(!genresJson.exists()) {
-        if(genresJson.open(QIODevice::WriteOnly)) {
-            genresJson.write("[]");
-            genresJson.close();
-            qDebug() << "Created empty genres.json";
-        }
-    }
-
-    QFile familiarSongsJson(JsonFamiliarSongsPath);
-    if(!familiarSongsJson.exists()) {
-        if(familiarSongsJson.open(QIODevice::WriteOnly)) {
-            familiarSongsJson.write("[]");
-            familiarSongsJson.close();
-            qDebug() << "Created empty familiar_songs.json";
-        }
-    }
-
-    QFile familiarArtistsJson(JsonFamiliarArtistsPath);
-    if(!familiarArtistsJson.exists()) {
-        if(familiarArtistsJson.open(QIODevice::WriteOnly)) {
-            familiarArtistsJson.write("[]");
-            familiarArtistsJson.close();
-            qDebug() << "Created empty familiar_artists.json";
-        }
-    }
-
     main_layout = new QVBoxLayout(this);
 
     pageDescription = new QLabel("this is yout stream page");
@@ -43,16 +11,16 @@ PlaylistsHubPageWidget::PlaylistsHubPageWidget(QWidget *parent)
 
     genreList = new GenreListWidget();
 
-    loadGenreInfoJson();
-    loadFamiliarArtistsJson();
-    loadFamiliarSongsJson();
+    playlistsService->loadGenreInfoJson();
+    historyService->loadFamiliarArtistsJson();
+    historyService->loadFamiliarSongsJson();
 
-    if(genresData.empty()) {
-        genresData = GENRES_DATA;
-        saveGenreInfoJson();
+    if(MusicGlobal::current_genres_data.empty()) {
+        MusicGlobal::current_genres_data = GENRES_DATA;
+        playlistsService->saveGenreInfoJson();
     }
 
-    genreList->setGenres(genresData);
+    genreList->setGenres(MusicGlobal::current_genres_data);
     main_layout->addWidget(genreList);
 
     familiarArtistsList = new ArtistsListWidget();
@@ -80,24 +48,19 @@ PlaylistsHubPageWidget::PlaylistsHubPageWidget(QWidget *parent)
     connect(familiarArtistsList, &ArtistsListWidget::playArtistPlaylist, this, &PlaylistsHubPageWidget::onPlayFamiliarArtist);
     connect(familiarArtistsList, &ArtistsListWidget::findArtistTracks, this, &PlaylistsHubPageWidget::onFindFamiliarArtistTracklits);
 
-    connect(&api, &MusicApi::artistTracklistSearchFinished, this, &PlaylistsHubPageWidget::onFamiliarArtistSignalRecieved);
+    connect(searchService, &SearchService::searchSongsByArtistIdFinished, this, &PlaylistsHubPageWidget::onFamiliarArtistSignalRecieved);
 }
 
 PlaylistsHubPageWidget::~PlaylistsHubPageWidget()
-{  
-    saveGenreInfoJson();
-    saveFamiliarArtistsJson();
-    saveFamiliarSongsJson();
+{
+    playlistsService->saveGenreInfoJson();
+    historyService->saveFamiliarArtistsJson();
+    historyService->saveFamiliarSongsJson();
 }
 
 void PlaylistsHubPageWidget::incrementGenreCounter(int genreId)
 {
-    for(auto& genre : genresData) {
-        if(genre.id == genreId) {
-            ++genre.playCounter;
-            break;
-        }
-    }
+    playlistsService->incrementGenreCounter(genreId);
 }
 
 void PlaylistsHubPageWidget::updateListWithNewData()
@@ -109,179 +72,11 @@ void PlaylistsHubPageWidget::updateListWithNewData()
     familiarArtistsList->setArtists(MusicGlobal::familiarArtists);
 }
 
-void PlaylistsHubPageWidget::saveGenreInfoJson()
-{
-    json j = json::array();
-
-    try {
-        for(const auto& item : genresData) {
-            j.push_back(item.toJson());
-        }
-
-        std::string jsonStr = j.dump(4);
-
-        QFile file(JsonGenresPath);
-        if(!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-            qDebug() << "Error on opening jsongenre file";
-            return;
-        }
-
-        file.write(jsonStr.c_str(), jsonStr.size());
-        file.close();
-
-        qDebug() << "dave genre info success";
-    } catch (json::exception& e) {
-        qDebug() << "catch json exc while saveGenreInfo" << e.what();
-    } catch (std::exception& e) {
-        qDebug() << "catch std::exception while saveGenreInfo" << e.what();
-    }
-}
-
-void PlaylistsHubPageWidget::loadGenreInfoJson()
-{
-    QFile file(JsonGenresPath);
-
-    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "Error on opening jsongenre file";
-        return;
-    }
-
-    genresData.clear();
-
-    QByteArray data = file.readAll();
-    file.close();
-
-    try {
-        json j = json::parse(data.toStdString());
-
-        for(const auto& item : j) {
-            if(item.is_object()) {
-                genresData.push_back(GenreData::fromJson(item));
-            }
-        }
-
-        std::sort(genresData.begin(), genresData.end(), compareGenresByPlayCount);
-    } catch (json::exception& e) {
-        qDebug() << "catch json exc while loadGenreInfo" << e.what();
-    } catch (std::exception& e) {
-        qDebug() << "catch std::exception while loadGenreInfo" << e.what();
-    }
-
-}
-
-void PlaylistsHubPageWidget::saveFamiliarSongsJson()
-{
-    json j = json::array();
-
-    try {
-        for(const auto& item : MusicGlobal::familiarSongs) {
-            j.push_back(songToJson(item));
-        }
-
-        std::string jsonStr = j.dump(4);
-
-        QFile file(JsonFamiliarSongsPath);
-        if(!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-            qDebug() << "error on openning json in save Familiar songs";
-            return;
-        }
-
-        file.write(jsonStr.c_str(), jsonStr.size());
-        file.close();
-    } catch (json::exception& e) {
-        qDebug() << "catch json exc while saveFamiliarSongs" << e.what();
-    } catch (std::exception& e) {
-        qDebug() << "catch std::exception while saveFamiliarSongs" << e.what();
-    }
-
-}
-
-void PlaylistsHubPageWidget::loadFamiliarSongsJson()
-{
-    QFile file(JsonFamiliarSongsPath);
-    if(!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "error on openning json in load Familiar songs";
-        return;
-    }
-
-    QByteArray data = file.readAll();
-    file.close();
-
-    try {
-        json j = json::parse(data.toStdString());
-
-        for(const auto& item : j) {
-            if(item.is_object()) {
-                MusicGlobal::familiarSongs.push_back(jsonToSong(item));
-            }
-        }
-    } catch (json::exception& e) {
-        qDebug() << "catch json exc while loadFamiliarSongs" << e.what();
-    } catch (std::exception& e) {
-        qDebug() << "catch std::exception while loadFamiliarSongs" << e.what();
-    }
-}
-
-void PlaylistsHubPageWidget::saveFamiliarArtistsJson()
-{
-    json j = json::array();
-
-    try {
-        for(const auto& item : MusicGlobal::familiarArtists) {
-            j.push_back(item.toJson());
-        }
-
-        std::string jsonStr = j.dump(4);
-
-        QFile file(JsonFamiliarArtistsPath);
-        if(!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-            qDebug() << "error on openning json in save Familiar songs";
-            return;
-        }
-
-        file.write(jsonStr.c_str(), jsonStr.size());
-        file.close();
-    } catch (json::exception& e) {
-        qDebug() << "catch json exc while saveFamiliarArtists" << e.what();
-    } catch (std::exception& e) {
-        qDebug() << "catch std::exception while saveFamiliarArtists" << e.what();
-    }
-
-}
-
-void PlaylistsHubPageWidget::loadFamiliarArtistsJson()
-{
-    QFile file(JsonFamiliarArtistsPath);
-    if(!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "error on openning json in load Familiar songs";
-        return;
-    }
-
-    QByteArray data = file.readAll();
-    file.close();
-
-    try {
-        json j = json::parse(data.toStdString());
-
-        for(const auto& item : j) {
-            if(item.is_object()) {
-                MusicGlobal::familiarArtists.push_back(ArtistData::fromJson(item));
-            }
-        }
-
-        std::sort(MusicGlobal::familiarArtists.begin(), MusicGlobal::familiarArtists.end(), compareArtistsByPlayCount);
-    } catch (json::exception& e) {
-        qDebug() << "catch json exc while loadFamiliarArtists" << e.what();
-    } catch (std::exception& e) {
-        qDebug() << "catch std::exception while loadFamiliarArtists" << e.what();
-    }
-}
-
 void PlaylistsHubPageWidget::onGenreSelected(int id)
 {
-    disconnect(&api, &MusicApi::genreSearchFinished, this, nullptr);
+    disconnect(searchService, &SearchService::searchSongsByGenreFinished, this, nullptr);
 
-    connect(&api, &MusicApi::genreSearchFinished, this, [=](const std::vector<Song>& tracklist) {
+    connect(searchService, &SearchService::searchSongsByGenreFinished, this, [=](const std::vector<Song>& tracklist) {
         if(tracklist.empty()) {
             qDebug() << "No tracks for genre" << id;
             return;
@@ -291,7 +86,7 @@ void PlaylistsHubPageWidget::onGenreSelected(int id)
     });
 
     qDebug() << "Searching genre:" << id;
-    api.searchByGenre(QString::number(id));
+    searchService->searchSongsByGenre(QString::number(id));
 }
 
 void PlaylistsHubPageWidget::onPlayFamiliarSongs()
@@ -317,15 +112,15 @@ void PlaylistsHubPageWidget::onPlayDownloadedSongs()
 
 void PlaylistsHubPageWidget::onPlayFamiliarArtist(const QString &artistId)
 {
-    api.getTracklistByArtistId(artistId, true);
+    searchService->searchSongsByArtistId(artistId, true);
 }
 
 void PlaylistsHubPageWidget::onFindFamiliarArtistTracklits(const QString &artistId)
 {
-    api.getTracklistByArtistId(artistId, false);
+    searchService->searchSongsByArtistId(artistId, false);
 }
 
-void PlaylistsHubPageWidget::onFamiliarArtistSignalRecieved(std::vector<Song> tracklist, bool isForPlay)
+void PlaylistsHubPageWidget::onFamiliarArtistSignalRecieved(const std::vector<Song>& tracklist, bool isForPlay)
 {
     if(isForPlay) {
         int randomId = rand() & tracklist.size();

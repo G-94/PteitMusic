@@ -12,17 +12,21 @@ class SearchService : public QObject
 public:
     explicit SearchService(MusicApi* api_);
 
-    MusicApi* api;
-
     void searchByQuery(const QString& query);
     void searchArtists(const QString& query);
     void searchSongsByArtistId(const QString &id, bool isForPlay);
+    void searchSongsByGenre(const QString& genre);
+
+private:
+
+    MusicApi* api;
 
 signals:
 
     void searchByQueryFinished(const std::vector<Song>& tracklist);
     void searchArtistsFinished(const std::vector<ArtistData> &artist_data);
     void searchSongsByArtistIdFinished(const std::vector<Song>& tracklist, bool isForPlay);
+    void searchSongsByGenreFinished(const std::vector<Song>& tracklist);
 
 };
 

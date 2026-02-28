@@ -29,9 +29,9 @@ struct GenreData {
 
     static GenreData fromJson (const json& j) {
         GenreData genre;
-        genre.name = j["name"].get<std::string>();
-        genre.id = j["id"].get<int>();
-        genre.playCounter = j["playCounter"].get<int>();
+        genre.name = j.at("id");
+        genre.id = j.at("name");
+        genre.playCounter = j.at("playCounter").get<int>();
         return genre;
     }
 };
@@ -63,7 +63,7 @@ struct ArtistData {
         ArtistData data;
         data.id = j.at("id");
         data.name = j.at("name");
-        data.playCounter = j.at("playCounter");
+        data.playCounter = j.at("playCounter").get<int>();
         return data;
     }
 };
@@ -79,6 +79,7 @@ namespace MusicGlobal {
 inline std::vector<Song> current_liked_tracklist;
 inline std::vector<Song> current_downloaded_tracklist;
 inline std::vector<ArtistData> familiarArtists;
+inline std::vector<GenreData> current_genres_data;
 inline std::vector<Song> familiarSongs;
 
 }

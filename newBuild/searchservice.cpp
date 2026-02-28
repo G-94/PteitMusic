@@ -13,6 +13,10 @@ SearchService::SearchService(MusicApi* api_) : api{api_} {
     QObject::connect(api, &MusicApi::artistTracklistSearchFinished, this, [this] (const std::vector<Song> &songs, bool isForPlay) {
         emit searchSongsByArtistIdFinished(songs, isForPlay);
     });
+
+    QObject::connect(api, &MusicApi::genreSearchFinished, this, [this] (const std::vector<Song> &songs) {
+        emit searchSongsByGenreFinished(songs);
+    });
 }
 
 void SearchService::searchByQuery(const QString &query)
@@ -29,4 +33,10 @@ void SearchService::searchSongsByArtistId(const QString &id, bool isForPlay)
 {
     api->getTracklistByArtistId(id, isForPlay);
 }
+
+void SearchService::searchSongsByGenre(const QString &genre)
+{
+    api->searchByGenre(genre);
+}
+
 

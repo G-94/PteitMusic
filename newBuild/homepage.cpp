@@ -1,7 +1,7 @@
 #include "homepage.h"
 
 homepage::homepage(QWidget *parent)
-    : QWidget{parent}, downloadsService{&api}, searchService{&api}
+    : QWidget{parent}, downloadsService{&api}, searchService{&api}, playerService(&api)
 {
     main_layout = new QHBoxLayout();
 
@@ -32,7 +32,7 @@ homepage::homepage(QWidget *parent)
     right_panel = new QWidget();
     pages = new QStackedWidget();
 
-    pagePlaylists = new PlaylistsHubPageWidget();
+    pagePlaylists = new PlaylistsHubPageWidget(&playlistsService, &historyService, &searchService);
     pages->addWidget(pagePlaylists);
 
     pageSearch = new SearchPanelWidget(&likesService, &downloadsService, &searchService);
@@ -46,7 +46,7 @@ homepage::homepage(QWidget *parent)
 
     pages->setCurrentWidget(pageSearch);
 
-    player = new PlayerWidget();
+    player = new PlayerWidget(&likesService, &downloadsService, &playerService, &historyService, &playlistsService);
 
     QVBoxLayout* right_panel_layout = new QVBoxLayout();
     right_panel_layout->addWidget(pages);

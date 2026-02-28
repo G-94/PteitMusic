@@ -19,13 +19,16 @@
 
 #include "genrelistwidget.h"
 #include "artistslistwidget.h"
+#include "playlistsservice.h"
+#include "searchservice.h"
+#include "historyservice.h"
 #include "MusicGlobals.h"
 
 class PlaylistsHubPageWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit PlaylistsHubPageWidget(QWidget *parent = nullptr);
+    explicit PlaylistsHubPageWidget(PlaylistsService* playlistsService_, HistoryService* historyService_, SearchService* searchService_);
     ~PlaylistsHubPageWidget();
 
     void incrementGenreCounter(int genreId);
@@ -39,7 +42,6 @@ private:
     QLabel* pageDescription;
 
     GenreListWidget* genreList;
-    std::vector<GenreData> genresData;
 
     ArtistsListWidget* familiarArtistsList;
 
@@ -48,20 +50,9 @@ private:
     QPushButton* btnPlayLikedSongs;
     QPushButton* btnPlayDownloadedSongs;
 
-    MusicApi api;
-
-    QString JsonGenresPath = "Data/genres_rank.json";
-    QString JsonFamiliarSongsPath = "Data/familiar_songs.json";
-    QString JsonFamiliarArtistsPath = "Data/familiar_artists.json";
-
-    void saveGenreInfoJson();
-    void loadGenreInfoJson();
-
-    void saveFamiliarSongsJson();
-    void loadFamiliarSongsJson();
-
-    void saveFamiliarArtistsJson();
-    void loadFamiliarArtistsJson();
+    PlaylistsService* playlistsService;
+    HistoryService* historyService;
+    SearchService* searchService;
 
 private slots:
 
@@ -71,7 +62,7 @@ private slots:
     void onPlayDownloadedSongs();
     void onPlayFamiliarArtist(const QString& artistId);
     void onFindFamiliarArtistTracklits(const QString& artistId);
-    void onFamiliarArtistSignalRecieved(std::vector<Song> tracklist, bool isForPlay);
+    void onFamiliarArtistSignalRecieved(const std::vector<Song>& tracklist, bool isForPlay);
 
 signals:
 

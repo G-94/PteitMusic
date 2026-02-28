@@ -1,15 +1,10 @@
 #include "playerwidget.h"
 
-PlayerWidget::PlayerWidget(QWidget *parent)
-    : QWidget{parent}
+PlayerWidget::PlayerWidget(LikesService* likesService_, DownloadsService* downloadsService_, PlayerService* playerService_,
+                            HistoryService* historyService_, PlaylistsService* playlistsService_)
+    : likesService{likesService_}, downloadsService{downloadsService_}, playerService(playerService_),
+    historyService{historyService_}, playlistsService{playlistsService_}
 {
-
-    QDir dir("Data/current_songs");
-    if (!dir.exists()) {
-        QDir().mkpath("Data/current_songs");
-        dir.mkdir(".");
-    }
-
     main_layout = new QVBoxLayout();
 
     track_title = new QLabel("Playlist is empty");
@@ -47,7 +42,6 @@ PlayerWidget::PlayerWidget(QWidget *parent)
     main_layout->addLayout(buttons_layout);
 
     this->setLayout(main_layout);
-    //this->setFixedSize(1100, 130);
 
     player = new QMediaPlayer();
     aOutput = new QAudioOutput();
@@ -89,7 +83,7 @@ PlayerWidget::PlayerWidget(QWidget *parent)
 
     QObject::connect(player, &QMediaPlayer::mediaStatusChanged, this, &PlayerWidget::onMediaStatusChanged);
 
-    QObject::connect(&api, &MusicApi::artistIdSearchBySongFinished, this, &PlayerWidget::onArtistIdSearchBySong);
+    QObject::connect(playerService, &PlayerService::searchArtistDataBySongIdFinished, this, &PlayerWidget::onArtistIdSearchBySong);
 }
 
 void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_song_index, const QString& param)
@@ -134,7 +128,7 @@ void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_s
             MusicGlobal::familiarSongs.push_back(song);
         }
 
-        api.getArtistDataBySongId(QString::fromStdString(song.at("id")));
+        playerService->getArtistDataBySongId(QString::fromStdString(song.at("id")));
 
         if(current_param == "from_source" || current_param == "from_source_random_order") {
             std::string song_title = song["title"] + " - " + song["artist"];
@@ -152,9 +146,6 @@ void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_s
         }
 
         std::string songString_url = song.at("url");
-
-        QString temp_file_location = "Data/current_songs/temp_" + QString::number(1) + ".mp3";
-
         std::string song_title = song["title"] + " - " + song["artist"];
         track_title->setText(QString::fromStdString(song_title));
 
@@ -170,7 +161,6 @@ void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_s
         qDebug() << "Exception was catch while trying to connect server";
 
     }
-
 }
 
 void PlayerWidget::checkNextAndPrev()
@@ -326,7 +316,7 @@ void PlayerWidget::onClickedbtnLike()
     btnLike->setText("Unlike");
     disconnect(btnLike, nullptr, nullptr, nullptr);
     connect(btnLike, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnUnlike);
-    emit likeSongRequest(currentPlaylist, current_song_index);
+    likesService->addSongToLikes(currentPlaylist.at(current_song_index));
 }
 
 void PlayerWidget::onClickedbtnUnlike()
@@ -335,7 +325,7 @@ void PlayerWidget::onClickedbtnUnlike()
     btnLike->setText("Like");
     disconnect(btnLike, nullptr, nullptr, nullptr);
     connect(btnLike, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnLike);
-    emit unlikeSongRequest(currentPlaylist, current_song_index);
+    likesService->removeSongFromLikes(currentPlaylist.at(current_song_index).at("id"));
 }
 
 void PlayerWidget::onClickedbtnDownload()
@@ -343,7 +333,7 @@ void PlayerWidget::onClickedbtnDownload()
     btnDownload->setText("Delete");
     disconnect(btnDownload, nullptr, nullptr, nullptr);
     connect(btnDownload, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnDelete);
-    emit downloadSongRequest(currentPlaylist, current_song_index);
+    downloadsService->addSongToDownloads(currentPlaylist.at(current_song_index));
 }
 
 void PlayerWidget::onClickedbtnDelete()
@@ -351,7 +341,7 @@ void PlayerWidget::onClickedbtnDelete()
     btnDownload->setText("Download");
     disconnect(btnDownload, nullptr, nullptr, nullptr);
     connect(btnDownload, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnDownload);
-    emit deleteSongRequest(currentPlaylist, current_song_index);
+    downloadsService->removeSongFromDownloads(currentPlaylist.at(current_song_index).at("id"));
 }
 
 void PlayerWidget::onClickedbtnVolume(bool Muted)
@@ -400,18 +390,5 @@ void PlayerWidget::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
 
 void PlayerWidget::onArtistIdSearchBySong(const ArtistData &data)
 {
-    bool found = false;
-    for(auto& item : MusicGlobal::familiarArtists) {
-        if(data.id == item.id) {
-            ++item.playCounter;
-            found = true;
-            break;
-        }
-    }
-
-    if(!found) {
-        MusicGlobal::familiarArtists.push_back(data);
-    }
-
     emit songPlayed();
 }
