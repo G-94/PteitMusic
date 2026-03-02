@@ -11,7 +11,6 @@ using json = nlohmann::json;
 
 ///
 
-
 struct GenreData {
     std::string name;
     int id;
@@ -261,4 +260,5 @@ inline std::vector<GenreData> GENRES_DATA = {
 
 
 #endif // MUSICGLOBALS_H
+
 
