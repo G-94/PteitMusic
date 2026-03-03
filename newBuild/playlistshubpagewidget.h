@@ -29,7 +29,6 @@ class PlaylistsHubPageWidget : public QWidget
     Q_OBJECT
 public:
     explicit PlaylistsHubPageWidget(PlaylistsService* playlistsService_, HistoryService* historyService_, SearchService* searchService_);
-    ~PlaylistsHubPageWidget();
 
     void incrementGenreCounter(int genreId);
 

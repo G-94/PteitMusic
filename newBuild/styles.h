@@ -24,6 +24,18 @@ public:
 
     static QString getLineEditStyle();
 
+    static QString getGenreListWidgetStyle();
+
+    static QString getNavButtonStyle();
+
+    static QString getLabelStyle();
+
+    static QString getQFrameWidgetStyle();
+
+    static QString getStreamButtonStyle();
+
+    static QString getPlayerWidgetStyle();
+
 
 };
 

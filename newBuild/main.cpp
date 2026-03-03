@@ -5,6 +5,8 @@
 #include "playerwidget.h"
 
 int main(int argc, char* argv[]) {
+    qputenv("QT_DISABLE_EMOJI_SEGMENTER", "1");
+
     QApplication app(argc, argv);
 
     std::srand(static_cast<unsigned>(std::time(nullptr)));
@@ -13,11 +15,9 @@ int main(int argc, char* argv[]) {
     MusicGlobal::current_downloaded_tracklist = {};
 
     homepage pl;
-    //pl.setFixedSize(1280, 720);
+    pl.setMinimumSize(1280, 720);
 
     pl.show();
-
-
 
     return app.exec();
 }

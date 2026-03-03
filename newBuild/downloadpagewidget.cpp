@@ -5,11 +5,19 @@ DownloadPageWidget::DownloadPageWidget(LikesService* likesService_, DownloadsSer
 {
     main_layout = new QVBoxLayout(this);
 
-    page_description = new QLabel("This is downloads list");
-    main_layout->addWidget(page_description);
+    QFrame* mainFrame = new QFrame();
+    QVBoxLayout* frame_layout = new QVBoxLayout(mainFrame);
+    mainFrame->setStyleSheet(Style::getQFrameWidgetStyle());
+
+    page_description = new QLabel("Скачанные песни");
+    page_description->setStyleSheet(Style::getLabelStyle());
+    page_description->setAlignment(Qt::AlignCenter);
+    frame_layout->addWidget(page_description);
 
     tracklist_widget = new ScrollableTrackList();
-    main_layout->addWidget(tracklist_widget);
+    frame_layout->addWidget(tracklist_widget);
+
+    main_layout->addWidget(mainFrame);
 
     QObject::connect(tracklist_widget, &ScrollableTrackList::setSongRequset, this, [this] (int ID) {
         emit setPlaySong(MusicGlobal::current_downloaded_tracklist, ID);

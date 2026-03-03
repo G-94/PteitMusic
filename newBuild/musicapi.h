@@ -33,6 +33,9 @@ public:
     void getArtistDataBySongId(QString id);
     QByteArray downloadSong(const QString& url);
 
+private:
+
+    std::string clearPath(const std::string& text);
 
 private slots:
 

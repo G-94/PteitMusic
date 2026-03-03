@@ -5,14 +5,20 @@ homepage::homepage(QWidget *parent)
 {
     main_layout = new QHBoxLayout();
 
+    QPalette pal = this->palette();
+    pal.setColor(QPalette::Window, QColor(20, 20, 20));
+    this->setPalette(pal);
+    this->setAutoFillBackground(true);
+
     ///
 
     //
     left_pages_panel = new QFrame();
-    btnPlaylistPage = new QPushButton();
-    btnSearchPage = new QPushButton();
-    btnLikePage = new QPushButton();
-    btnDownloadedPage = new QPushButton();
+    left_pages_panel->setStyleSheet(Style::getNavButtonStyle());
+    btnPlaylistPage = new QPushButton("Главное");
+    btnSearchPage = new QPushButton("Поиск");
+    btnLikePage = new QPushButton("Нравится");
+    btnDownloadedPage = new QPushButton("Скачанное");
 
     QVBoxLayout *left_panel_layout = new QVBoxLayout();
     left_panel_layout->addWidget(btnPlaylistPage);
@@ -95,33 +101,40 @@ homepage::homepage(QWidget *parent)
     QObject::connect(&downloadsService, &DownloadsService::downloadedSongsUpdated, this, &homepage::onDownloadsSongsUpdated);
 }
 
-void homepage::setPlaySelectedSong(std::vector<Song> tracklist, int ID)
+homepage::~homepage()
+{
+    playlistsService.saveGenreInfoJson();
+    historyService.saveFamiliarArtistsJson();
+    historyService.saveFamiliarSongsJson();
+}
+
+void homepage::setPlaySelectedSong(const std::vector<Song>& tracklist, int ID)
 {
     player->SetSong(tracklist, ID);
 }
 
-void homepage::setPlaySelectedSongFromSource(std::vector<Song> tracklist, int ID)
+void homepage::setPlaySelectedSongFromSource(const std::vector<Song>& tracklist, int ID)
 {
     player->SetSong(tracklist, ID, "from_source");
 }
 
-void homepage::setPlaySongPlaylistFromSourceInRandomOrder(std::vector<Song> tracklist, int ID)
+void homepage::setPlaySongPlaylistFromSourceInRandomOrder(const std::vector<Song>& tracklist, int ID)
 {
     player->SetSong(tracklist, ID, "from_source_random_order");
 }
 
-void homepage::setPlaySelectedGenrePlaylist(std::vector<Song> tracklist, int ID, int genreId)
+void homepage::setPlaySelectedGenrePlaylist(const std::vector<Song>& tracklist, int ID, int genreId)
 {
     pagePlaylists->incrementGenreCounter(genreId);
     player->SetSong(tracklist, ID, "random_order");
 }
 
-void homepage::setPlayPlaylistInRandomOrder(std::vector<Song> tracklist, int ID)
+void homepage::setPlayPlaylistInRandomOrder(const std::vector<Song>& tracklist, int ID)
 {
     player->SetSong(tracklist, ID, "random_order");
 }
 
-void homepage::onFindArtistTracklist(std::vector<Song> tracklist)
+void homepage::onFindArtistTracklist(const std::vector<Song>& tracklist)
 {
     pageSearch->setTracklist(tracklist);
     pages->setCurrentWidget(pageSearch);

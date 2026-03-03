@@ -2,6 +2,7 @@
 #define LIKESPAGEWIDGET_H
 
 #include <QWidget>
+#include <QFrame>
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QDir>
@@ -25,7 +26,7 @@ private:
 
     QVBoxLayout* main_layout;
     ScrollableTrackList* tracklist_widget;
-    QLabel* page_discription;
+    QLabel* page_description;
 
     QString likesPath = "Data/liked_songs.json";
 

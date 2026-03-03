@@ -6,8 +6,14 @@ PlaylistsHubPageWidget::PlaylistsHubPageWidget(PlaylistsService* playlistsServic
 {
     main_layout = new QVBoxLayout(this);
 
-    pageDescription = new QLabel("this is yout stream page");
-    main_layout->addWidget(pageDescription);
+    QFrame* mainFrame = new QFrame();
+    QVBoxLayout* frame_layout = new QVBoxLayout(mainFrame);
+    mainFrame->setStyleSheet(Style::getQFrameWidgetStyle());
+
+    pageDescription = new QLabel("Музыкальный поток");
+    pageDescription->setStyleSheet(Style::getLabelStyle());
+    pageDescription->setAlignment(Qt::AlignCenter);
+    frame_layout->addWidget(pageDescription);
 
     genreList = new GenreListWidget();
 
@@ -15,30 +21,31 @@ PlaylistsHubPageWidget::PlaylistsHubPageWidget(PlaylistsService* playlistsServic
     historyService->loadFamiliarArtistsJson();
     historyService->loadFamiliarSongsJson();
 
-    if(MusicGlobal::current_genres_data.empty()) {
-        MusicGlobal::current_genres_data = GENRES_DATA;
-        playlistsService->saveGenreInfoJson();
-    }
-
     genreList->setGenres(MusicGlobal::current_genres_data);
-    main_layout->addWidget(genreList);
+    qDebug() << "set gent";
+    frame_layout->addWidget(genreList);
 
     familiarArtistsList = new ArtistsListWidget();
+    familiarArtistsList->setFixedHeight(180);
     familiarArtistsList->setArtists(MusicGlobal::familiarArtists);
-    main_layout->addWidget(familiarArtistsList);
+    frame_layout->addWidget(familiarArtistsList);
 
-    streams_layout = new QHBoxLayout();
+    QWidget* container = new QWidget();
+    container->setStyleSheet(Style::getStreamButtonStyle());
+    streams_layout = new QHBoxLayout(container);
 
-    btnPlayFamiliarSongs = new QPushButton("play familiar songs");
+    btnPlayFamiliarSongs = new QPushButton("Знакомые песни");
     streams_layout->addWidget(btnPlayFamiliarSongs);
 
-    btnPlayLikedSongs = new QPushButton("Play liked songs");
+    btnPlayLikedSongs = new QPushButton("Вам нравятся");
     streams_layout->addWidget(btnPlayLikedSongs);
 
-    btnPlayDownloadedSongs = new QPushButton("Play downloaded songs");
+    btnPlayDownloadedSongs = new QPushButton("Скаченные");
     streams_layout->addWidget(btnPlayDownloadedSongs);
 
-    main_layout->addLayout(streams_layout);
+    frame_layout->addWidget(container);
+
+    main_layout->addWidget(mainFrame);
 
     connect(genreList, &GenreListWidget::genreSelected, this, &PlaylistsHubPageWidget::onGenreSelected);
     connect(btnPlayFamiliarSongs, &QPushButton::clicked, this, &PlaylistsHubPageWidget::onPlayFamiliarSongs);
@@ -49,13 +56,6 @@ PlaylistsHubPageWidget::PlaylistsHubPageWidget(PlaylistsService* playlistsServic
     connect(familiarArtistsList, &ArtistsListWidget::findArtistTracks, this, &PlaylistsHubPageWidget::onFindFamiliarArtistTracklits);
 
     connect(searchService, &SearchService::searchSongsByArtistIdFinished, this, &PlaylistsHubPageWidget::onFamiliarArtistSignalRecieved);
-}
-
-PlaylistsHubPageWidget::~PlaylistsHubPageWidget()
-{
-    playlistsService->saveGenreInfoJson();
-    historyService->saveFamiliarArtistsJson();
-    historyService->saveFamiliarSongsJson();
 }
 
 void PlaylistsHubPageWidget::incrementGenreCounter(int genreId)

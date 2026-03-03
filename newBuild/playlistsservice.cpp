@@ -78,6 +78,11 @@ void PlaylistsService::loadGenreInfoJson()
             }
         }
 
+        if(MusicGlobal::current_genres_data.empty()) {
+            MusicGlobal::current_genres_data = GENRES_DATA;
+            saveGenreInfoJson();
+        }
+
         std::sort(MusicGlobal::current_genres_data.begin(), MusicGlobal::current_genres_data.end(), compareGenresByPlayCount);
     } catch (json::exception& e) {
         qDebug() << "catch json exc while loadGenreInfo" << e.what();

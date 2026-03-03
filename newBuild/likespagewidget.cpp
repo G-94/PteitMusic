@@ -4,11 +4,21 @@ LikesPageWidget::LikesPageWidget(LikesService* likesService_, DownloadsService* 
 {
     main_layout = new QVBoxLayout(this);
 
-    page_discription = new QLabel("There is your liked songs");
-    main_layout->addWidget(page_discription);
+    QFrame *mainFrame = new QFrame();
+
+    mainFrame->setStyleSheet(Style::getQFrameWidgetStyle());
+
+    QVBoxLayout *frame_layout = new QVBoxLayout(mainFrame);
+
+    page_description = new QLabel("Понравившиеся песни");
+    page_description->setStyleSheet(Style::getLabelStyle());
+    page_description->setAlignment(Qt::AlignCenter);
+    frame_layout->addWidget(page_description);
 
     tracklist_widget = new ScrollableTrackList();
-    main_layout->addWidget(tracklist_widget);
+    frame_layout->addWidget(tracklist_widget);
+
+    main_layout->addWidget(mainFrame);
 
     QObject::connect(tracklist_widget, &ScrollableTrackList::setSongRequset, [this] (int songID) {
         emit setPlaySong(MusicGlobal::current_liked_tracklist, songID);

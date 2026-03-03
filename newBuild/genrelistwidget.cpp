@@ -3,7 +3,16 @@
 GenreListWidget::GenreListWidget(QWidget *parent)
     : QWidget{parent}
 {
+    QPalette pal = this->palette();
+    pal.setColor(QPalette::Window, QColor(45, 45, 45));
+    this->setPalette(pal);
+    this->setAutoFillBackground(true);
+
+    this->setStyleSheet(Style::getGenreListWidgetStyle());
+
     main_layout = new QVBoxLayout(this);
+    main_layout->setContentsMargins(0, 0, 0, 0);
+    main_layout->setSpacing(0);
 
     scrollContent = new QWidget();
     buttons_layout = new QHBoxLayout(scrollContent);
@@ -15,7 +24,7 @@ GenreListWidget::GenreListWidget(QWidget *parent)
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     main_layout->addWidget(scrollArea);
-    setFixedHeight(150);
+    setFixedHeight(300);
 }
 
 void GenreListWidget::setGenres(const std::vector<GenreData> &buttons_data)

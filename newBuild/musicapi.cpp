@@ -161,14 +161,27 @@ void MusicApi::onArtistDataBySongIdFinished(QNetworkReply *reply)
 {
     if(reply->error() == QNetworkReply::NoError) {
         ArtistData result;
+        try {
+            QString strReply = reply->readAll();
+            auto temp_reply_splitted = strReply.split("play-attr__link\" href=\"/artist/");
 
-        QString strReply = reply->readAll();
-        strReply = strReply.split("play-attr__link\" href=\"/artist/")[1];
+            if(temp_reply_splitted.size() < 2) {
+                emit error("error in onArtistDataBySongIDFinished");
+                return;
+            }
 
-        result.id = strReply.split("\">")[0].toStdString();
-        result.name = strReply.split("\">")[1].split("</a>")[0].toStdString();
-        emit artistIdSearchBySongFinished(result);
+            strReply = temp_reply_splitted.at(1);
+
+            result.id = strReply.split("\">").at(0).toStdString();
+            result.name = strReply.split("\">").at(1).split("</a>").at(0).toStdString();
+
+
+            emit artistIdSearchBySongFinished(result);
+        } catch (...) {
+            emit error("error in onArtistDataBySongIDFinished");
+        }
     }
+
 }
 
 std::vector<Song> MusicApi::parseHtml(const QByteArray &data)
@@ -184,6 +197,7 @@ std::vector<Song> MusicApi::parseHtml(const QByteArray &data)
             break;
 
         std::string jsonStr = html.substr(start, end-start);
+
 
         try {
             json j = json::parse(jsonStr);
@@ -201,6 +215,11 @@ std::vector<Song> MusicApi::parseHtml(const QByteArray &data)
                 if(durEnd != std::string::npos) {
                     song["duration"] = html.substr(durStart, durEnd - durStart);
                 }
+            }
+
+            std::string url = song.at("url");
+            if (url.find("/cuts/") != std::string::npos) {
+                continue;
             }
 
             result.push_back(song);

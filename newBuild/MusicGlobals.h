@@ -29,8 +29,8 @@ struct GenreData {
 
     static GenreData fromJson (const json& j) {
         GenreData genre;
-        genre.name = j.at("id");
-        genre.id = j.at("name");
+        genre.name = j.at("name");
+        genre.id = j.at("id");
         genre.playCounter = j.at("playCounter").get<int>();
         return genre;
     }

@@ -6,6 +6,8 @@
 #include <QScrollBar>
 #include <QVBoxLayout>
 #include <QList>
+#include <QTimer>
+#include <QApplication>
 
 #include "songtracklistitem.h"
 #include "MusicGlobals.h"

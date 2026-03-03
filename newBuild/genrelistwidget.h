@@ -8,6 +8,7 @@
 #include <QPushButton>
 
 #include "MusicGlobals.h"
+#include "styles.h"
 
 class GenreListWidget : public QWidget
 {

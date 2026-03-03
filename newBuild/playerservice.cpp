@@ -13,8 +13,16 @@ PlayerService::PlayerService(MusicApi* api_) : api{api_}
         }
 
         if(!found) {
-            MusicGlobal::familiarArtists.push_back(data);
+            ArtistData newArtist = data;
+            newArtist.playCounter = 1;
+            MusicGlobal::familiarArtists.push_back(newArtist);
         }
+
+        emit searchArtistDataBySongIdFinished(data);
+    });
+
+    QObject::connect(api, &MusicApi::error, this, [this] (const QString& ex) {
+        qDebug() << ex;
     });
 }
 

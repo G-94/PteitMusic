@@ -17,7 +17,7 @@ ArtistsListItem::ArtistsListItem(const ArtistData &data_) : data{data_}
     btnArtistFindTracks = new QPushButton("Найти треки");
     btnArtistFindTracks->setStyleSheet(Style::getArtistListItemButtonStyle());
     btn_layout->addWidget(btnArtistFindTracks);
-    btnArtistPlayPlaylist = new QPushButton("Поточек");
+    btnArtistPlayPlaylist = new QPushButton("Поток");
     btnArtistPlayPlaylist->setStyleSheet(Style::getArtistListItemButtonStyle());
     btn_layout->addWidget(btnArtistPlayPlaylist);
 

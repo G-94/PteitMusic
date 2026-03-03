@@ -20,7 +20,6 @@ ArtistsListWidget::ArtistsListWidget(QWidget *parent)
     scrollArea->setStyleSheet(Style::getArtistListWidgetStyle());
 
     main_layout->addWidget(scrollArea);
-    setFixedHeight(150);
 }
 
 void ArtistsListWidget::setArtists(const std::vector<ArtistData> &artistList)

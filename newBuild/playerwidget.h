@@ -15,6 +15,8 @@
 #include <QTime>
 #include <QByteArray>
 #include <QRandomGenerator>
+#include <QEvent>
+#include <QMouseEvent>
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
@@ -26,6 +28,7 @@
 #include "playlistsservice.h"
 #include "historyservice.h"
 #include "playerservice.h"
+#include"styles.h"
 
 class PlayerWidget : public QWidget
 {
@@ -70,6 +73,9 @@ private:
     PlayerService* playerService;
 
     void checkNextAndPrev();
+
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
 private slots:
 

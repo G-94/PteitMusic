@@ -5,10 +5,9 @@ SearchPanelWidget::SearchPanelWidget(LikesService* likesService_, DownloadsServi
 {
     main_layout = new QVBoxLayout(this);
 
-    QPalette pal = this->palette();
-    pal.setColor(QPalette::Window, QColor(45, 45, 45));
-    this->setPalette(pal);
-    this->setAutoFillBackground(true);
+    QFrame* mainFrame = new QFrame();
+    QVBoxLayout* frame_layout = new QVBoxLayout(mainFrame);
+    mainFrame->setStyleSheet(Style::getQFrameWidgetStyle());
 
     QHBoxLayout* search_layout = new QHBoxLayout();
     search_line = new QLineEdit();
@@ -19,15 +18,17 @@ SearchPanelWidget::SearchPanelWidget(LikesService* likesService_, DownloadsServi
     search_layout->addWidget(search_line);
     search_layout->addWidget(btnSearch);
 
-    main_layout->addLayout(search_layout);
+    frame_layout->addLayout(search_layout);
 
     artists_search_result = new ArtistsListWidget();
-    artists_search_result->setFixedHeight(140);
+    artists_search_result->setFixedHeight(160);
     artists_search_result->setVisible(false);
-    main_layout->addWidget(artists_search_result);
+    frame_layout->addWidget(artists_search_result);
 
     search_result = new ScrollableTrackList();
-    main_layout->addWidget(search_result, 1);
+    frame_layout->addWidget(search_result, 1);
+
+    main_layout->addWidget(mainFrame);
 
     QObject::connect(btnSearch, &QPushButton::clicked, this, &SearchPanelWidget::onClickedSearchbtn);
     QObject::connect(search_line, &QLineEdit::returnPressed, this, &SearchPanelWidget::onClickedSearchbtn);

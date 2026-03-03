@@ -6,40 +6,51 @@ PlayerWidget::PlayerWidget(LikesService* likesService_, DownloadsService* downlo
     historyService{historyService_}, playlistsService{playlistsService_}
 {
     main_layout = new QVBoxLayout();
+    main_layout->setContentsMargins(15, 10, 15, 10);
+    main_layout->setSpacing(8);
 
-    track_title = new QLabel("Playlist is empty");
+    this->setStyleSheet(Style::getPlayerWidgetStyle());
+
+    track_title = new QLabel("В плеере пусто");
+    track_title->setStyleSheet(Style::getLabelStyle());
     main_layout->addWidget(track_title);
 
     QHBoxLayout* slider = new QHBoxLayout();
     trackTimePos = new QSlider(Qt::Orientation::Horizontal);
     trackTimePos->setPageStep(1);
     track_dur = new QLabel("00:00");
+    track_dur->setStyleSheet(Style::getLabelStyle());
     slider->addWidget(trackTimePos);
     slider->addWidget(track_dur);
     main_layout->addLayout(slider);
 
-    QHBoxLayout* buttons_layout = new QHBoxLayout();
+    QWidget* container = new QWidget();
+    container->setStyleSheet(Style::getCircleButtonStyle());
+    QHBoxLayout* buttons_layout = new QHBoxLayout(container);
 
-    btnPlay = new QPushButton("Play");
+    btnPlay = new QPushButton("▶");
     btnPlay->setEnabled(false);
-    btnPlayNext = new QPushButton("Next");
+    btnPlayNext = new QPushButton("▶▶");
     btnPlayNext->setEnabled(false);
-    btnPlayPrev = new QPushButton("Previous");
+    btnPlayPrev = new QPushButton("◀◀");
     btnPlayPrev->setEnabled(false);
-    btnLike = new QPushButton("Like");
+    btnLike = new QPushButton("♥");
     btnLike->setEnabled(false);
-    btnDownload = new QPushButton("Download");
+    btnDownload = new QPushButton("⤓");
     btnDownload->setEnabled(false);
-    btnVolume = new QRadioButton("Volume off");
+    btnVolume = new QRadioButton("Выключить звук");
+
+    buttons_layout->addStretch();
 
     buttons_layout->addWidget(btnLike);
     buttons_layout->addWidget(btnPlayPrev);
     buttons_layout->addWidget(btnPlay);
     buttons_layout->addWidget(btnPlayNext);
     buttons_layout->addWidget(btnDownload);
+    buttons_layout->addStretch();
     buttons_layout->addWidget(btnVolume);
 
-    main_layout->addLayout(buttons_layout);
+    main_layout->addWidget(container);
 
     this->setLayout(main_layout);
 
@@ -73,17 +84,11 @@ PlayerWidget::PlayerWidget(LikesService* likesService_, DownloadsService* downlo
         trackTimePos->setRange(0, 100);
     });
 
-    QObject::connect(trackTimePos, &QSlider::sliderReleased, this, [this]() {
-        if (player && player->duration() > 0) {
-            int value = trackTimePos->value();
-            qint64 newPos = (static_cast<qint64>(value) * player->duration()) / 100;
-            player->setPosition(newPos);
-        }
-    });
-
     QObject::connect(player, &QMediaPlayer::mediaStatusChanged, this, &PlayerWidget::onMediaStatusChanged);
-
     QObject::connect(playerService, &PlayerService::searchArtistDataBySongIdFinished, this, &PlayerWidget::onArtistIdSearchBySong);
+
+    trackTimePos->setAttribute(Qt::WA_TransparentForMouseEvents, false);
+    trackTimePos->installEventFilter(this);
 }
 
 void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_song_index, const QString& param)
@@ -105,7 +110,7 @@ void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_s
         return;
     }
 
-    if(current_song_index < 0 || current_song_index >= playlist.size()) {
+    if(current_song_index < 0 || current_song_index >= currentPlaylist.size()) {
         qDebug() << "Wrong current song index";
         return;
     }
@@ -159,14 +164,13 @@ void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_s
 
     } catch(...) {
         qDebug() << "Exception was catch while trying to connect server";
-
     }
 }
 
 void PlayerWidget::checkNextAndPrev()
 {
     if(current_song_index > 0) {
-        if(current_param == "random_order") {
+        if(current_param == "random_order" || current_param == "from_source_random_order") {
             btnPlayPrev->setEnabled(false);
             btnPlayNext->setEnabled(true);
             return;
@@ -186,6 +190,32 @@ void PlayerWidget::checkNextAndPrev()
     }
 }
 
+bool PlayerWidget::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == trackTimePos && event->type() == QEvent::MouseButtonPress) {
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+
+        int pos = mouseEvent->pos().x();
+        int width = trackTimePos->width();
+
+        if (width > 0) {
+            int range = trackTimePos->maximum() - trackTimePos->minimum();
+            int value = trackTimePos->minimum() + (pos * range / width);
+
+            trackTimePos->setValue(value);
+
+            if (player && player->duration() > 0) {
+                qint64 newPos = (static_cast<qint64>(value) * player->duration()) / 100;
+                player->setPosition(newPos);
+            }
+
+            return true;
+        }
+    }
+
+    return QWidget::eventFilter(obj, event);
+}
+
 void PlayerWidget::checkLikes()
 {
     if(currentPlaylist.empty() || current_song_index < 0) return;
@@ -201,10 +231,10 @@ void PlayerWidget::checkLikes()
     }
 
     if(isLiked) {
-        btnLike->setText("Unlike");
+        btnLike->setText("♥");
         connect(btnLike, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnUnlike);
     } else {
-        btnLike->setText("Like");
+        btnLike->setText("♡");
         connect(btnLike, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnLike);
     }
 
@@ -227,10 +257,10 @@ void PlayerWidget::checkDownloads()
     }
 
     if(isDownloaded) {
-        btnDownload->setText("Delete");
+        btnDownload->setText("✕");
         connect(btnDownload, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnDelete);
     } else {
-        btnDownload->setText("Download");
+        btnDownload->setText("⤓");
         connect(btnDownload, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnDownload);
     }
 
@@ -243,7 +273,7 @@ void PlayerWidget::onClickedbtnPlay()
         return;
     }
     player->play();
-    btnPlay->setText("Pause");
+    btnPlay->setText("││");
     disconnect(btnPlay, nullptr, nullptr, nullptr);
     connect(btnPlay, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnPause);
     qDebug() << "Playing";
@@ -253,7 +283,7 @@ void PlayerWidget::onClickedbtnPlay()
 void PlayerWidget::onClickedbtnPause()
 {
     player->pause();
-    btnPlay->setText("Play");
+    btnPlay->setText("▶");
     disconnect(btnPlay, nullptr, nullptr, nullptr);
     connect(btnPlay, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnPlay);
     qDebug() << "Paused";
@@ -263,30 +293,26 @@ void PlayerWidget::onClickedbtnPlayNext()
 {
     if(currentPlaylist.empty() || current_song_index < 0) return;
 
-    int nextSongIndex = current_song_index + 1;
-    if (nextSongIndex < currentPlaylist.size()) {
-        if(current_param == "from_source") {
-            SetSong(currentPlaylist, nextSongIndex, "from_source");
-        } else if (current_param == "random_order") {
-            int randomIndex;
-            do {
-                randomIndex = std::rand() % currentPlaylist.size();
-            } while(randomIndex == current_song_index);
+    if (current_param == "random_order" || current_param == "from_source_random_order") {
+        int randomIndex;
+        do {
+            randomIndex = std::rand() % currentPlaylist.size();
+        } while(randomIndex == current_song_index && currentPlaylist.size() > 1);
 
-            SetSong(currentPlaylist, randomIndex, "random_order");
-        } else if (current_param == "from_source_random_order") {
-            int randomIndex;
-            do {
-                randomIndex = std::rand() % currentPlaylist.size();
-            } while(randomIndex == current_song_index);
-
-            SetSong(currentPlaylist, randomIndex, "from_source_random_order");
-        } else {
-            SetSong(currentPlaylist, nextSongIndex);
-        }
+        SetSong(currentPlaylist, randomIndex, current_param);
         onClickedbtnPlay();
+    } else {
+        int nextSongIndex = current_song_index + 1;
+        if (nextSongIndex < currentPlaylist.size()) {
+            if(current_param == "from_source") {
+                SetSong(currentPlaylist, nextSongIndex, "from_source");
+            } else {
+                SetSong(currentPlaylist, nextSongIndex);
+            }
+
+            onClickedbtnPlay();
+        }
     }
-    else qDebug() << "No next track in playlist";
 }
 
 void PlayerWidget::onClickedbtnPlayPrev()
@@ -313,7 +339,6 @@ void PlayerWidget::onClickedbtnPlayPrev()
 void PlayerWidget::onClickedbtnLike()
 {
     qDebug() << "Like button clicked";
-    btnLike->setText("Unlike");
     disconnect(btnLike, nullptr, nullptr, nullptr);
     connect(btnLike, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnUnlike);
     likesService->addSongToLikes(currentPlaylist.at(current_song_index));
@@ -322,7 +347,6 @@ void PlayerWidget::onClickedbtnLike()
 void PlayerWidget::onClickedbtnUnlike()
 {
     qDebug() << "Unlike button clicked";
-    btnLike->setText("Like");
     disconnect(btnLike, nullptr, nullptr, nullptr);
     connect(btnLike, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnLike);
     likesService->removeSongFromLikes(currentPlaylist.at(current_song_index).at("id"));
@@ -330,7 +354,6 @@ void PlayerWidget::onClickedbtnUnlike()
 
 void PlayerWidget::onClickedbtnDownload()
 {
-    btnDownload->setText("Delete");
     disconnect(btnDownload, nullptr, nullptr, nullptr);
     connect(btnDownload, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnDelete);
     downloadsService->addSongToDownloads(currentPlaylist.at(current_song_index));
@@ -338,7 +361,6 @@ void PlayerWidget::onClickedbtnDownload()
 
 void PlayerWidget::onClickedbtnDelete()
 {
-    btnDownload->setText("Download");
     disconnect(btnDownload, nullptr, nullptr, nullptr);
     connect(btnDownload, &QPushButton::clicked, this, &PlayerWidget::onClickedbtnDownload);
     downloadsService->removeSongFromDownloads(currentPlaylist.at(current_song_index).at("id"));
@@ -364,27 +386,22 @@ void PlayerWidget::onPlaybackStateChanged(QMediaPlayer::PlaybackState state)
 void PlayerWidget::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
     switch(status) {
     case QMediaPlayer::EndOfMedia:
-        if(current_song_index + 1 < currentPlaylist.size()) {
+        if(current_param == "random_order" || current_param == "from_source_random_order") {
+            int randomIndex;
+            do {
+                randomIndex = std::rand() % currentPlaylist.size();
+            } while(randomIndex == current_song_index && currentPlaylist.size() > 1);
+
+            SetSong(currentPlaylist, randomIndex, current_param);
+        }
+        else if(current_song_index + 1 < currentPlaylist.size()) {
             if(current_param == "from_source") {
-                this->SetSong(currentPlaylist, current_song_index + 1, "from_source");
-            } else if (current_param == "random_order") {
-                int randomIndex;
-                do {
-                    randomIndex = std::rand() % currentPlaylist.size();
-                } while(randomIndex == current_song_index);
-
-                SetSong(currentPlaylist, randomIndex, "random_order");
-            } else if (current_param == "from_source_random_order") {
-                int randomIndex;
-                do {
-                    randomIndex = std::rand() % currentPlaylist.size();
-                } while(randomIndex == current_song_index);
-
-                SetSong(currentPlaylist, randomIndex, "from_source_random_order");
+                SetSong(currentPlaylist, current_song_index + 1, current_param);
             } else {
-                this->SetSong(currentPlaylist, current_song_index + 1);
+                SetSong(currentPlaylist, current_song_index + 1);
             }
         }
+        break;
     }
 }
 

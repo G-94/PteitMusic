@@ -29,9 +29,10 @@ ScrollableTrackList::ScrollableTrackList(const std::vector<Song>& tracklist_) : 
     if(!tracklist_.empty()) {
         setTracklist(tracklist_);
     }
+
 }
 
-void ScrollableTrackList::setTracklist(const std::vector<Song>& tracklist_)
+void ScrollableTrackList::setTracklist(const std::vector<Song> &tracklist_)
 {
     clear();
 
@@ -73,7 +74,6 @@ void ScrollableTrackList::setTracklist(const std::vector<Song>& tracklist_)
 
     list_layout->addStretch();
     listWidget->adjustSize();
-
 }
 
 void ScrollableTrackList::updateTracklist(const std::vector<Song>& tracklist_)

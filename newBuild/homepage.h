@@ -36,6 +36,7 @@ class homepage : public QWidget
     Q_OBJECT
 public:
     explicit homepage(QWidget *parent = nullptr);
+    ~homepage();
 
 private:
 
@@ -68,17 +69,17 @@ private:
 
 private slots:
 
-    void setPlaySelectedSong(std::vector<Song> tracklist, int ID);
+    void setPlaySelectedSong(const std::vector<Song>& tracklist, int ID);
 
-    void setPlaySelectedSongFromSource(std::vector<Song> tracklist, int ID);
+    void setPlaySelectedSongFromSource(const std::vector<Song>& tracklist, int ID);
 
-    void setPlaySongPlaylistFromSourceInRandomOrder(std::vector<Song> tracklist, int ID);
+    void setPlaySongPlaylistFromSourceInRandomOrder(const std::vector<Song>& tracklist, int ID);
 
-    void setPlaySelectedGenrePlaylist(std::vector<Song> tracklist, int ID, int genreId);
+    void setPlaySelectedGenrePlaylist(const std::vector<Song>& tracklist, int ID, int genreId);
 
-    void setPlayPlaylistInRandomOrder(std::vector<Song> tracklist, int ID);
+    void setPlayPlaylistInRandomOrder(const std::vector<Song>& tracklist, int ID);
 
-    void onFindArtistTracklist(std::vector<Song> tracklist);
+    void onFindArtistTracklist(const std::vector<Song>& tracklist);
 
     void onLikesSongsUpdated();
 
