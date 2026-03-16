@@ -9,10 +9,19 @@ DownloadPageWidget::DownloadPageWidget(LikesService* likesService_, DownloadsSer
     QVBoxLayout* frame_layout = new QVBoxLayout(mainFrame);
     mainFrame->setStyleSheet(Style::getQFrameWidgetStyle());
 
+    QHBoxLayout* title_layout = new QHBoxLayout();
     page_description = new QLabel("Скачанные песни");
     page_description->setStyleSheet(Style::getLabelStyle());
     page_description->setAlignment(Qt::AlignCenter);
-    frame_layout->addWidget(page_description);
+    title_layout->addWidget(page_description);
+
+    title_layout->addStretch();
+
+    btnPlayDownloadedSongs = new QPushButton("Поток по скачанным");
+    btnPlayDownloadedSongs->setStyleSheet(Style::getStreamButtonStyle());
+    title_layout->addWidget(btnPlayDownloadedSongs);
+
+    frame_layout->addLayout(title_layout);
 
     tracklist_widget = new ScrollableTrackList();
     frame_layout->addWidget(tracklist_widget);
@@ -38,6 +47,12 @@ DownloadPageWidget::DownloadPageWidget(LikesService* likesService_, DownloadsSer
             std::string song_id = MusicGlobal::current_downloaded_tracklist[index].at("id");
             downloadsService->removeSongFromDownloads(song_id);
         }
+    });
+
+    QObject::connect(btnPlayDownloadedSongs, &QPushButton::clicked, this, [this] () {
+        if(MusicGlobal::current_downloaded_tracklist.empty()) return;
+        int randomInt = rand() % MusicGlobal::current_downloaded_tracklist.size();
+        emit setPlayDownloadedPlaylist(MusicGlobal::current_downloaded_tracklist, randomInt);
     });
 
     downloadsService->loadDownloadsSongs();

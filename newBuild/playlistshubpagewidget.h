@@ -10,13 +10,11 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QRadioButton>
-#include "musicapi.h"
 #include <QDir>
 #include <QTime>
 #include <QByteArray>
-#include <QRandomGenerator>
-#include <fstream>
 
+#include "musicapi.h"
 #include "genrelistwidget.h"
 #include "artistslistwidget.h"
 #include "playlistsservice.h"

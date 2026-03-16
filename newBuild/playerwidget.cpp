@@ -18,8 +18,11 @@ PlayerWidget::PlayerWidget(LikesService* likesService_, DownloadsService* downlo
     QHBoxLayout* slider = new QHBoxLayout();
     trackTimePos = new QSlider(Qt::Orientation::Horizontal);
     trackTimePos->setPageStep(1);
+    current_track_pos = new QLabel("00:00");
+    current_track_pos->setStyleSheet(Style::getLabelStyle());
     track_dur = new QLabel("00:00");
     track_dur->setStyleSheet(Style::getLabelStyle());
+    slider->addWidget(current_track_pos);
     slider->addWidget(trackTimePos);
     slider->addWidget(track_dur);
     main_layout->addLayout(slider);
@@ -74,9 +77,9 @@ PlayerWidget::PlayerWidget(LikesService* likesService_, DownloadsService* downlo
 
             QTime currentTime(0, 0, 0);
             currentTime = currentTime.addMSecs(static_cast<int>(pos));
-            track_dur->setText(currentTime.toString("mm:ss"));
+            current_track_pos->setText(currentTime.toString("mm:ss"));
 
-            qDebug() << static_cast<QString>(currentPlaylist[current_song_index]["duration"].c_str()) << track_dur->text();
+            qDebug() << static_cast<QString>(currentPlaylist[current_song_index]["duration"].c_str()) << current_track_pos->text();
         }
     });
 
@@ -87,8 +90,25 @@ PlayerWidget::PlayerWidget(LikesService* likesService_, DownloadsService* downlo
     QObject::connect(player, &QMediaPlayer::mediaStatusChanged, this, &PlayerWidget::onMediaStatusChanged);
     QObject::connect(playerService, &PlayerService::searchArtistDataBySongIdFinished, this, &PlayerWidget::onArtistIdSearchBySong);
 
+    connect(player, &QMediaPlayer::errorOccurred, this, [this](QMediaPlayer::Error error, const QString &errorString) {
+        qDebug() << "QMediaPlayer error: " << error << errorString;
+
+        if (error == QMediaPlayer::NetworkError || error == QMediaPlayer::ResourceError) {
+            qDebug() << "NO internet";
+
+            qint64 position = player->position();
+
+            QUrl currentSource = player->source();
+            player->stop();
+            player->setSource(currentSource);
+            player->setPosition(position);
+            player->play();
+        }
+    });
+
     trackTimePos->setAttribute(Qt::WA_TransparentForMouseEvents, false);
     trackTimePos->installEventFilter(this);
+
 }
 
 void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_song_index, const QString& param)
@@ -104,6 +124,7 @@ void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_s
         btnLike->setEnabled(false);
         btnDownload->setEnabled(false);
         trackTimePos->setValue(0);
+        current_track_pos->setText("00:00");
         track_dur->setText("00:00");
         track_title->setText("Uknown");
 
@@ -140,29 +161,24 @@ void PlayerWidget::SetSong(const std::vector<Song> &playlist, int temp_current_s
             track_title->setText(QString::fromStdString(song_title));
 
             player->setSource(QUrl::fromLocalFile(QString::fromStdString(song.at("path"))));
-            player->setPosition(0);
-            btnLike->setEnabled(true);
-            btnDownload->setEnabled(true);
-            btnPlay->setEnabled(true);
-            track_dur->setText("00:00");
-            onClickedbtnPlay();
+        } else {
+            std::string songString_url = song.at("url");
+            std::string song_title = song["title"] + " - " + song["artist"];
+            track_title->setText(QString::fromStdString(song_title));
 
-            return;
+            player->setSource(QUrl(songString_url.c_str()));
         }
 
-        std::string songString_url = song.at("url");
-        std::string song_title = song["title"] + " - " + song["artist"];
-        track_title->setText(QString::fromStdString(song_title));
-
-        player->setSource(QUrl(songString_url.c_str()));
         player->setPosition(0);
         btnLike->setEnabled(true);
         btnDownload->setEnabled(true);
         btnPlay->setEnabled(true);
-        track_dur->setText("00:00");
+        current_track_pos->setText("00:00");
+        track_dur->setText(song.at("duration").c_str());
         onClickedbtnPlay();
 
     } catch(...) {
+        track_title->setText("Ошибка во время воспроизведения трека");
         qDebug() << "Exception was catch while trying to connect server";
     }
 }
@@ -368,6 +384,7 @@ void PlayerWidget::onClickedbtnDelete()
 
 void PlayerWidget::onClickedbtnVolume(bool Muted)
 {
+    isMuted = Muted;
     player->audioOutput()->setMuted(Muted);
 }
 
@@ -409,3 +426,4 @@ void PlayerWidget::onArtistIdSearchBySong(const ArtistData &data)
 {
     emit songPlayed();
 }
+

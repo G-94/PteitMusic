@@ -27,6 +27,7 @@ private:
     QVBoxLayout* main_layout;
     ScrollableTrackList* tracklist_widget;
     QLabel* page_description;
+    QPushButton* btnPlayLikedSongs;
 
     QString likesPath = "Data/liked_songs.json";
 
@@ -36,6 +37,7 @@ private:
 signals:
 
     void likesSongUpdated();
+    void setPlayLikedSongsPlaylist(std::vector<Song> tracklist, int ID);
     void setPlaySong(std::vector<Song> tracklist, int ID);
     void setDownloadSong(std::vector<Song> tracklist, int ID);
     void setDeleteSong(std::vector<Song> tracklist, int ID);

@@ -31,7 +31,6 @@ private:
 
     MusicApi* api;
 
-    QFutureWatcher<QByteArray> downloadWatcher;
     QFutureWatcher<bool> deleteWatcher;
 
     QString downloadsDir = "Downloads";

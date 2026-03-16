@@ -10,10 +10,19 @@ LikesPageWidget::LikesPageWidget(LikesService* likesService_, DownloadsService* 
 
     QVBoxLayout *frame_layout = new QVBoxLayout(mainFrame);
 
+    QHBoxLayout* title_layout = new QHBoxLayout();
     page_description = new QLabel("Понравившиеся песни");
     page_description->setStyleSheet(Style::getLabelStyle());
     page_description->setAlignment(Qt::AlignCenter);
-    frame_layout->addWidget(page_description);
+    title_layout->addWidget(page_description);
+
+    title_layout->addStretch();
+
+    btnPlayLikedSongs = new QPushButton("Поток по понравившимся");
+    btnPlayLikedSongs->setStyleSheet(Style::getStreamButtonStyle());
+    title_layout->addWidget(btnPlayLikedSongs);
+
+    frame_layout->addLayout(title_layout);
 
     tracklist_widget = new ScrollableTrackList();
     frame_layout->addWidget(tracklist_widget);
@@ -38,6 +47,12 @@ LikesPageWidget::LikesPageWidget(LikesService* likesService_, DownloadsService* 
         Song song = tracklist_widget->getTracklist()[songID];
         likesService->removeSongFromLikes(song.at("id"));
         tracklist_widget->updateTracklist(MusicGlobal::current_liked_tracklist);
+    });
+
+    QObject::connect(btnPlayLikedSongs, &QPushButton::clicked, this, [this] () {
+        if(MusicGlobal::current_liked_tracklist.empty()) return;
+        int randomInt = rand() % MusicGlobal::current_liked_tracklist.size();
+        emit setPlayLikedSongsPlaylist(MusicGlobal::current_liked_tracklist, randomInt);
     });
 
     likesService->loadLikesSongs();

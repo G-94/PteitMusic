@@ -2,6 +2,8 @@
 #define PLAYERWIDGET_H
 
 #include <QWidget>
+#include <QApplication>
+#include <QShortcut>
 #include <QMediaPlayer>
 #include <QAudioOutput>
 #include <QPushButton>
@@ -10,25 +12,27 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QRadioButton>
-#include "musicapi.h"
 #include <QDir>
 #include <QTime>
 #include <QByteArray>
 #include <QRandomGenerator>
 #include <QEvent>
+#include <QLineEdit>
 #include <QMouseEvent>
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
 
 #include "MusicGlobals.h"
+#include "musicapi.h"
+#include"styles.h"
 
 #include "likesservice.h"
 #include "downloadsservice.h"
 #include "playlistsservice.h"
 #include "historyservice.h"
 #include "playerservice.h"
-#include"styles.h"
+
 
 class PlayerWidget : public QWidget
 {
@@ -58,6 +62,7 @@ private:
     QRadioButton *btnVolume;
 
     QLabel* track_title;
+    QLabel *current_track_pos;
     QLabel *track_dur;
 
     QVBoxLayout* main_layout;
@@ -65,6 +70,8 @@ private:
     QString current_param;
     std::vector<Song> currentPlaylist;
     int current_song_index = -1;
+
+    bool isMuted;
 
     HistoryService* historyService;
     LikesService* likesService;

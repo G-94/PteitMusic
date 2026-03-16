@@ -217,11 +217,6 @@ std::vector<Song> MusicApi::parseHtml(const QByteArray &data)
                 }
             }
 
-            std::string url = song.at("url");
-            if (url.find("/cuts/") != std::string::npos) {
-                continue;
-            }
-
             result.push_back(song);
         } catch (...) {
             qDebug() << "Error on parseHtml in api";

@@ -398,8 +398,8 @@ QString Style::getStreamButtonStyle()
         font-size: 14px;
         font-weight: bold;
         font-family: 'Arial', 'Segoe UI', sans-serif;
-        min-width: 160px;
-        max-width: 180px;
+        min-width: 170px;
+        max-width: 190px;
         outline: none;
     }
 
@@ -483,6 +483,11 @@ QString Style::getPlayerWidgetStyle()
         max-height: 40px;
         text-align: center;
         margin: 0px 5px;
+        outline: none;
+    }
+
+    PlayerWidget QPushButton:focus {
+        outline: none;
     }
 
     PlayerWidget QPushButton:hover {
@@ -554,6 +559,10 @@ QString Style::getPlayerWidgetStyle()
         height: 16px;
         border-radius: 8px;
         background-color: #666666;
+    }
+
+    PlayerWidget QRadioButton:focus {
+        outline: none;
     }
 
     PlayerWidget QRadioButton::indicator:checked {

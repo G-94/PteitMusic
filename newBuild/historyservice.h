@@ -25,7 +25,6 @@ private:
     QString JsonFamiliarSongsPath = "Data/familiar_songs.json";
     QString JsonFamiliarArtistsPath = "Data/familiar_artists.json";
 
-signals:
 };
 
 #endif // HISTORYSERVICE_H

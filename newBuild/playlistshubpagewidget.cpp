@@ -40,7 +40,7 @@ PlaylistsHubPageWidget::PlaylistsHubPageWidget(PlaylistsService* playlistsServic
     btnPlayLikedSongs = new QPushButton("Вам нравятся");
     streams_layout->addWidget(btnPlayLikedSongs);
 
-    btnPlayDownloadedSongs = new QPushButton("Скаченные");
+    btnPlayDownloadedSongs = new QPushButton("Скачанные");
     streams_layout->addWidget(btnPlayDownloadedSongs);
 
     frame_layout->addWidget(container);

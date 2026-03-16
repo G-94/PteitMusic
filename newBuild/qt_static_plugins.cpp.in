@@ -1,0 +1,12 @@
+#include <QtPlugin>
+
+// Только те плагины, которые реально используются
+Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+
+#ifdef QT_MULTIMEDIA_LIB
+Q_IMPORT_PLUGIN(QWindowsAudioPlugin)
+#endif
+
+#ifdef QT_NETWORK_LIB
+Q_IMPORT_PLUGIN(QTlsBackendOpenSSLPlugin)
+#endif

@@ -16,11 +16,9 @@ public:
     explicit LikesService(QObject *parent = nullptr);
 
     void addSongToLikes(const Song &song);
-
     void removeSongFromLikes(const std::string &songID);
 
     void loadLikesSongs();
-
     void saveLikedSongs();
 
 private:

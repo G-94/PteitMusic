@@ -36,7 +36,6 @@ public:
 
     static QString getPlayerWidgetStyle();
 
-
 };
 
 #endif // STYLES_H

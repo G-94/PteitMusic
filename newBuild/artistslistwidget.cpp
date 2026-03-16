@@ -11,6 +11,7 @@ ArtistsListWidget::ArtistsListWidget(QWidget *parent)
 
     scrollContent = new QWidget();
     scroll_layout = new QHBoxLayout(scrollContent);
+    scroll_layout->setAlignment(Qt::AlignLeft);
 
     scrollArea = new QScrollArea();
     scrollArea->setWidgetResizable(true);

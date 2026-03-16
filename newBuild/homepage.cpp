@@ -13,12 +13,12 @@ homepage::homepage(QWidget *parent)
     ///
 
     //
-    left_pages_panel = new QFrame();
-    left_pages_panel->setStyleSheet(Style::getNavButtonStyle());
+    navigation_panel = new QFrame();
+    navigation_panel->setStyleSheet(Style::getNavButtonStyle());
     btnPlaylistPage = new QPushButton("Главное");
     btnSearchPage = new QPushButton("Поиск");
     btnLikePage = new QPushButton("Нравится");
-    btnDownloadedPage = new QPushButton("Скачанное");
+    btnDownloadedPage = new QPushButton("Скачанные");
 
     QVBoxLayout *left_panel_layout = new QVBoxLayout();
     left_panel_layout->addWidget(btnPlaylistPage);
@@ -26,12 +26,12 @@ homepage::homepage(QWidget *parent)
     left_panel_layout->addWidget(btnLikePage);
     left_panel_layout->addWidget(btnDownloadedPage);
 
-    left_pages_panel->setLayout(left_panel_layout);
-    left_pages_panel->setFixedWidth(150);
+    navigation_panel->setLayout(left_panel_layout);
+    navigation_panel->setFixedWidth(150);
 
     ///
 
-    main_layout->addWidget(left_pages_panel);
+    main_layout->addWidget(navigation_panel);
 
     ///
 
@@ -41,7 +41,7 @@ homepage::homepage(QWidget *parent)
     pagePlaylists = new PlaylistsHubPageWidget(&playlistsService, &historyService, &searchService);
     pages->addWidget(pagePlaylists);
 
-    pageSearch = new SearchPanelWidget(&likesService, &downloadsService, &searchService);
+    pageSearch = new SearchPageWidget(&likesService, &downloadsService, &searchService);
     pages->addWidget(pageSearch);
 
     pageLikes = new LikesPageWidget(&likesService, &downloadsService);
@@ -81,12 +81,14 @@ homepage::homepage(QWidget *parent)
         pages->setCurrentWidget(pageDownloads);
     });
 
-    QObject::connect(pageSearch, &SearchPanelWidget::playSelectedSong, this, &homepage::setPlaySelectedSong);
-    QObject::connect(pageSearch, &SearchPanelWidget::playArtistPlaylist, this, &homepage::setPlayPlaylistInRandomOrder);
+    QObject::connect(pageSearch, &SearchPageWidget::playSelectedSong, this, &homepage::setPlaySelectedSong);
+    QObject::connect(pageSearch, &SearchPageWidget::playArtistPlaylist, this, &homepage::setPlayPlaylistInRandomOrder);
 
     QObject::connect(pageLikes, &LikesPageWidget::setPlaySong, this, &homepage::setPlaySelectedSong);
+    QObject::connect(pageLikes, &LikesPageWidget::setPlayLikedSongsPlaylist, this, &homepage::setPlayPlaylistInRandomOrder);
 
     QObject::connect(pageDownloads, &DownloadPageWidget::setPlaySong, this, &homepage::setPlaySelectedSongFromSource);
+    QObject::connect(pageDownloads, &DownloadPageWidget::setPlayDownloadedPlaylist, this, &homepage::setPlaySongPlaylistFromSourceInRandomOrder);
 
     QObject::connect(pagePlaylists, &PlaylistsHubPageWidget::playGenrePlaylist, this, &homepage::setPlaySelectedGenrePlaylist);
     QObject::connect(pagePlaylists, &PlaylistsHubPageWidget::playFamiliarArtistPlaylist, this, &homepage::setPlayPlaylistInRandomOrder);

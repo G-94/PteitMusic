@@ -14,7 +14,7 @@
 #include <QDir>
 
 #include "include/nlohmann/json/json.hpp"
-#include "searchpanelwidget.h"
+#include "searchpagewidget.h"
 #include "playerwidget.h"
 #include "likespagewidget.h"
 #include "downloadpagewidget.h"
@@ -42,7 +42,7 @@ private:
 
     QHBoxLayout* main_layout;
     QVBoxLayout* right_panel_layout;
-    QFrame* left_pages_panel;
+    QFrame* navigation_panel;
     QWidget *right_panel;
 
     MusicApi api;
@@ -55,7 +55,7 @@ private:
     PlayerService playerService;
 
     QStackedWidget* pages;
-    SearchPanelWidget* pageSearch;
+    SearchPageWidget* pageSearch;
     LikesPageWidget* pageLikes;
     DownloadPageWidget* pageDownloads;
     PlaylistsHubPageWidget* pagePlaylists;
@@ -70,23 +70,17 @@ private:
 private slots:
 
     void setPlaySelectedSong(const std::vector<Song>& tracklist, int ID);
-
     void setPlaySelectedSongFromSource(const std::vector<Song>& tracklist, int ID);
-
     void setPlaySongPlaylistFromSourceInRandomOrder(const std::vector<Song>& tracklist, int ID);
-
     void setPlaySelectedGenrePlaylist(const std::vector<Song>& tracklist, int ID, int genreId);
-
     void setPlayPlaylistInRandomOrder(const std::vector<Song>& tracklist, int ID);
 
     void onFindArtistTracklist(const std::vector<Song>& tracklist);
 
     void onLikesSongsUpdated();
-
     void onDownloadsSongsUpdated();
 
     void onPlayedNewSong();
-
 
 signals:
 };

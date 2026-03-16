@@ -10,9 +10,9 @@
 #include <QtConcurrent>
 
 #include <include/nlohmann/json/json.hpp>
-#include "scrollabletracklist.h"
 #include "MusicGlobals.h"
 
+#include "scrollabletracklist.h"
 #include "likesservice.h"
 #include "downloadsservice.h"
 
@@ -28,14 +28,15 @@ private:
 
     QVBoxLayout* main_layout;
     QLabel* page_description;
+    QPushButton* btnPlayDownloadedSongs;
     ScrollableTrackList* tracklist_widget;
 
     LikesService* likesService;
     DownloadsService* downloadsService;
 
-
 signals:
 
+    void setPlayDownloadedPlaylist(std::vector<Song> tracklist, int ID);
     void setPlaySong(std::vector<Song> tracklist, int ID);
     void setLikedSong(std::vector<Song> tracklist, int ID);
     void setUnlikedSong(std::vector<Song> tracklist, int ID);
